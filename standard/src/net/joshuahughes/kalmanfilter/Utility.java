@@ -1,4 +1,4 @@
-package net.joshuahughes;
+package net.joshuahughes.kalmanfilter;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -8,13 +8,6 @@ import org.apache.commons.math3.linear.LUDecomposition;
 
 public class Utility {
 	public static Random rand = new Random(9832927l);
-    public static double[][] getzk(double[] data) {
-    	
-    	double[] zk = Arrays.copyOfRange(data,1,data.length);
-    	zk[0]+=70*(.5-rand.nextDouble())+100;
-    	zk[4]=.000001;
-    	return new double[][]{zk};
-    }
     public static double[][] sum( double[][] s0, double[][] s1 )
     {
         double[][] sum = new double[s0.length][s0[0].length];
@@ -27,29 +20,16 @@ public class Utility {
     {
         return new LUDecomposition( new Array2DRowRealMatrix( matrix ) ).getSolver( ).getInverse( ).getData( );
     }
-    public static double[][] getRk( int dim1, int dim2 )
+    public static double[][] diagonal(int dim,double value)
     {
-        int iDim = dim1*dim2;
-        double[][] identity = new double[iDim][iDim];
-        for(int index=0;index<iDim;index++)
-            identity[index][index] = .01*rand.nextDouble();
-        return identity;
+        double[][] diagonal = new double[dim][dim];
+        for(int index=0;index<dim;index++)
+            diagonal[index][index] = 1;
+        return diagonal;
     }
-    public static double[][] getIdentity( int dim1, int dim2 )
+    public static double[][] identity(int dim)
     {
-        int iDim = dim1*dim2;
-        double[][] identity = new double[iDim][iDim];
-        for(int index=0;index<iDim;index++)
-            identity[index][index] = 1;
-        return identity;
-    }
-    public static double[][] getH( int dim1, int dim2 )
-    {
-        int hDim = dim1*dim2;
-        double[][] H = new double[hDim][hDim];
-        for(int index=0;index<hDim;index++)
-            H[index][index] = 1;
-        return H;
+    	return diagonal(dim,1);
     }
     public static double[][] difference( double[][] s0, double[][] s1 )
     {
@@ -77,6 +57,25 @@ public class Utility {
             }
         }
         return product;
+    }
+
+    
+    public static double[][] getRk( int dim1, int dim2 )
+    {
+        int iDim = dim1*dim2;
+        double[][] identity = new double[iDim][iDim];
+        for(int index=0;index<iDim;index++)
+            identity[index][index] = .01*rand.nextDouble();
+        return identity;
+    }
+    
+    public static double[][] getH( int dim1, int dim2 )
+    {
+        int hDim = dim1*dim2;
+        double[][] H = new double[hDim][hDim];
+        for(int index=0;index<hDim;index++)
+            H[index][index] = 1;
+        return H;
     }
     public static double[][] getzk( int tgtCnt, int stateCount, double[][] data )
     {
@@ -144,5 +143,11 @@ public class Utility {
         for(double[] array : matrix)
             System.out.println(Arrays.toString( array ));
     }
+	public static double[][] diagonal(double... values) {
+		double[][] diagonal = new double[values.length][values.length];
+		for(int index=0;index<diagonal.length;index++)
+			diagonal[index][index] = values[index];
+		return diagonal;
+	}
 
 }
