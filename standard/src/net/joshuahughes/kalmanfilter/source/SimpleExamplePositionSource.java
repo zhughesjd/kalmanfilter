@@ -12,7 +12,6 @@ public class  SimpleExamplePositionSource extends ArrayList<Source.Data> impleme
 	public SimpleExamplePositionSource(int timeCount,int targetCount,int stateCount,boolean useVelocityMeasure)
 	{
 		dim = targetCount*stateCount;
-		Pk0k0 = Utility.diagonal(dim, .5);
 
 		Random rand = new Random(934757384);
 		double[][] generate = new double[timeCount][];
@@ -56,7 +55,7 @@ public class  SimpleExamplePositionSource extends ArrayList<Source.Data> impleme
 	}
 	@Override
 	public double[][] getPk0k0() {
-		return Pk0k0;
+		return Utility.diagonal(dim, .5);
 	}
 	@Override
 	public double[][] getFk(double dt) {
@@ -80,10 +79,10 @@ public class  SimpleExamplePositionSource extends ArrayList<Source.Data> impleme
 	}
 	@Override
 	public double[][] getQk1(double priorTime) {
-		return Utility.diagonal(dim,.000001);
+		return Utility.diagonal(dim,.0001);
 	}
 	@Override
 	public double[][] getRk(double time) {
-		return Utility.diagonal(dim,100);
+		return Utility.diagonal(dim,50);
 	}
 }
