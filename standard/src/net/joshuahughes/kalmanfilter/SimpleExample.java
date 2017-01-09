@@ -1,35 +1,28 @@
 package net.joshuahughes.kalmanfilter;
 
-import java.awt.Color;
 import java.util.Arrays;
 import java.util.Random;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.LUDecomposition;
 
-import net.joshuahughes.kalmanfilter.receiver.JDialogReceiver;
+import net.joshuahughes.kalmanfilter.source.SimpleExamplePositionSource;
+import net.joshuahughes.kalmanfilter.source.Source;
+import net.joshuahughes.kalmanfilter.source.Source.Data;
+import net.joshuahughes.kalmanfilter.target.JDialogTarget;
 
 public class SimpleExample
 {
 	static Random rand = new Random(437583478);//bad1,bad2
-	public static boolean useVelocityMeasure = true;
 	public static void main(String[] args) throws Exception
 	{
 		int maxTargets = 2;
 		int timeCount = 1000;
-		double oxx = 40;
-		double oxy = oxx;
-		double ovx = 0;
-		double ovy = 0;
-		double oa1 = 0;
-		double oa2 = 0;
-		double on1 = 0;
-		double on2 = 0;
-		JDialogReceiver receiver = new JDialogReceiver(timeCount, timeCount);
+		int stateCount = 4;
 
-		double[][] truth = generate(timeCount);
-		double[][] zks = perturb(truth,0,oxx,oxy,ovx,ovy,oa1,oa2,on1,on2,oxx,oxy,ovx,ovy,oa1,oa2,on1,on2);
-		int stateCount = truth[0].length/maxTargets/2;
+		JDialogTarget target = new JDialogTarget(timeCount, timeCount);
+		Source source = new SimpleExamplePositionSource(timeCount, maxTargets, stateCount, true);
+
 		// Using https://en.wikipedia.org/wiki/Kalman_filter#Details
 		double tk1=Double.NaN;
 		double[][] xk1k1 = null;
@@ -37,88 +30,40 @@ public class SimpleExample
 		double[][] I = getIdentity(maxTargets,stateCount);
 		double[][] Qk1 = getQk1(maxTargets,stateCount);
 		double[][] Rk = getRk(maxTargets,stateCount);
-		double[][] Hk = getH(maxTargets,stateCount);
+		double[][] Hk = getHk(maxTargets,stateCount);
 		double[][] HkT = transpose(Hk);
-
-		for(int index=0;index<zks.length;index++)
+		
+		for(Data data : source)
 		{
-			double[] data = zks[index];
-			double tk = data[0];
-			double[][] zk = getzk(data);
-			receiver.receive(truth[index][1],truth[index][2],Color.yellow);
-			receiver.receive(truth[index][9],truth[index][10],Color.white);
-			receiver.receive(zk[0][0],zk[0][1],Color.blue);
-			receiver.receive(zk[0][8],zk[0][9],Color.cyan);
-			if(Double.isNaN(tk1))
+			double tk = data.time;
+			double[][] zk = transpose(new double[][]{data.measurements});
+			target.receive(data);
+			if(Double.isNaN(tk1)) // initialize xk_0k_0 and Pk_0k_0 with first measurements
 			{
-				xk1k1 = getzk(maxTargets,stateCount,zk);
-				Pk1k1 = getPk1k1(maxTargets,stateCount,zk);
-				tk1 = tk;
-				continue;
+				xk1k1 = zk;
+				Pk1k1 = source.getPk0k0();
 			}
-			double[][] Fk =getFk(maxTargets,stateCount,tk-tk1);
-			double[][] xkk1 = product(Fk,xk1k1);
-			double[][] Pkk1 = sum(product(product(Fk,Pk1k1),transpose(Fk)),Qk1);
-			//Skip if no measurements
-			if(zk.length>0)
+			else //otherwise 
 			{
-				zk = getzk(maxTargets,stateCount,zk);
-				double[][] yk = difference(zk,product(Hk,xkk1));
-				double[][] Sk = sum(product(Hk,product(Pkk1,HkT)),Rk);
-				double[][] Kk = product(Pkk1,product(HkT,inverse(Sk)));
-				double[][] xkk = sum(xkk1,product(Kk,yk));
-				double[][] Pkk = product(difference(I,product(Kk,Hk)),Pkk1);
-				xk1k1 = xkk;
-				Pk1k1 = Pkk;
+				double[][] Fk = source.getFk(tk-tk1);
+				double[][] xkk1 = product(Fk,xk1k1);
+				double[][] Pkk1 = sum(product(product(Fk,Pk1k1),transpose(Fk)),Qk1);
+				//Skip if no measurements  *** this needs to be tested ***
+				if(zk.length>0)
+				{
+					double[][] yk = difference(zk,product(Hk,xkk1));
+					double[][] Sk = sum(product(Hk,product(Pkk1,HkT)),Rk);
+					double[][] Kk = product(Pkk1,product(HkT,inverse(Sk)));
+					double[][] xkk = sum(xkk1,product(Kk,yk));
+					double[][] Pkk = product(difference(I,product(Kk,Hk)),Pkk1);
+					xk1k1 = xkk;
+					Pk1k1 = Pkk;
+				}
 			}
 			tk1 = tk;
-			receiver.receive(xk1k1[0][0],xk1k1[1][0],Color.red);
-			receiver.receive(xk1k1[4][0],xk1k1[5][0],Color.green);
+			target.receive(xk1k1,Pk1k1);
 			Thread.sleep(10);
 		}
-	}
-	public static double[][] perturb(double[][] data,double... sigmas)
-	{
-		double[][] perturb = new double[data.length][data[0].length];
-		for(int x=0;x<perturb.length;x++)
-			for(int y=0;y<perturb[0].length;y++)
-				perturb[x][y] = data[x][y] + sigmas[y]*rand.nextGaussian();
-		return perturb;
-	}
-	public static double[][] generate(int timeCount) {
-		double[][] generate = new double[timeCount][];
-		double vx00 = useVelocityMeasure?0:0;
-		double vy00 = useVelocityMeasure?1:0;
-
-		double vx01 = useVelocityMeasure?1:0;
-		double vy01 = useVelocityMeasure?1:0;
-		
-		double vx10 = useVelocityMeasure?1:0;
-		double vy10 = useVelocityMeasure?0:0;
-		
-		double vx11 = useVelocityMeasure?1:0;
-		double vy11 = useVelocityMeasure?-1:0;
-
-		for(int index=0;index<generate.length;index++)
-		{
-			int offset = 50;
-			int arrayPos = index+offset;
-			if(index<generate.length/2)
-				generate[index] = new double[]{index,500,arrayPos,vx00,vy00,0.5,0.5,0.5,0.5,arrayPos,500,vx10,vy10,0.5,0.5,0.5,0.5};
-			else
-				generate[index] = new double[]{index,arrayPos-offset,arrayPos,vx01,vy01,0.5,0.5,0.5,0.5,arrayPos,generate.length-arrayPos+offset,vx11,vy11,0.5,0.5,0.5,0.5};
-		}
-//		for(int index=0;index<generate.length;index++)
-//			if(index<generate.length/2)
-//				generate[index] = new double[]{index,500,index,0,1,0.5,0.5,0.5,0.5,index,500,1,0,0.5,0.5,0.5,0.5};
-//			else
-//				generate[index] = new double[]{index,index,index,0,1,0.5,0.5,0.5,0.5,index,generate.length-index,1,0,0.5,0.5,0.5,0.5};
-
-		return generate;
-	}
-	private static double[][] getzk(double[] data)
-	{
-		return new double[][]{Arrays.copyOfRange(data,1,data.length)};
 	}
 	private static double[][] sum( double[][] s0, double[][] s1 )
 	{
@@ -156,7 +101,7 @@ public class SimpleExample
 			identity[index][index] = 1;
 		return identity;
 	}
-	private static double[][] getH( int dim1, int dim2 )
+	private static double[][] getHk( int dim1, int dim2 )
 	{
 		int hDim = dim1*dim2;
 		double[][] H = new double[hDim][hDim];
@@ -176,7 +121,8 @@ public class SimpleExample
 	{
 		double sum = 0;
 		int dim1 = m1.length;
-		int midDim = m2.length;
+		//this ensures the second dim of m1 is equal to the first dim of m2
+		int midDim = Math.max(m1[0].length, m2.length);
 		int dim2 = m2[0].length;
 		double[][] product = new double[dim1][dim2];
 		for (int c = 0; c < dim1; c++) {
@@ -213,8 +159,7 @@ public class SimpleExample
 		double[][] xk1k1 = new double[1][dim];
 		//skip over
 		int xIndex = 0;
-		int startIndex=0;
-		int index = startIndex;
+		int index = 0;
 		while(xIndex+stateCount<xk1k1[0].length && index+stateCount<zk.length)
 		{
 			for(int i=0;i<stateCount;i++)
@@ -224,20 +169,6 @@ public class SimpleExample
 			index+=2*stateCount;
 		}
 		return xk1k1;
-	}
-	private static double[][] getFk( int tgtCnt,int stateCount, double dt )
-	{
-		int dim = stateCount*tgtCnt;
-		double[][] Fk = new double[dim][dim];
-		for(int i=0;i<dim;i++)
-		{
-			Fk[i][i] = 1;
-			if(i<dim-2 && i%4<2)
-			{
-				Fk[i][i+2] = dt;
-			}
-		}
-		return Fk;
 	}
 	public static double[][] transpose( double[][] matrix )
 	{

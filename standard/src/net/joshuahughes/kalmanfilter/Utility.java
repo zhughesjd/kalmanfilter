@@ -24,7 +24,7 @@ public class Utility {
     {
         double[][] diagonal = new double[dim][dim];
         for(int index=0;index<dim;index++)
-            diagonal[index][index] = 1;
+            diagonal[index][index] = value;
         return diagonal;
     }
     public static double[][] identity(int dim)
