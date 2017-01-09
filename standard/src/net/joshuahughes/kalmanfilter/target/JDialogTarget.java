@@ -13,13 +13,9 @@ import javax.swing.WindowConstants;
 
 import net.joshuahughes.kalmanfilter.source.Source.Data;
 
-import org.jcodec.api.awt.SequenceEncoder;
-
 public class JDialogTarget implements Target{
     Graphics2D g2d;
     JLabel lbl;
-    SequenceEncoder enc = null;
-    int timeIndex=0;
     public JDialogTarget(int xSize,int ySize)
     {
         BufferedImage image = new BufferedImage(xSize,ySize,BufferedImage.TYPE_3BYTE_BGR);
@@ -32,7 +28,8 @@ public class JDialogTarget implements Target{
         dlg.setVisible(true);
 
     }
-    public void receive(double x,double y, Color color) {
+    public void receive(double x,double y, Color color)
+    {
         g2d.setColor(color);
         g2d.fillOval((int)x,(int)y, 5, 5);
         lbl.repaint();
