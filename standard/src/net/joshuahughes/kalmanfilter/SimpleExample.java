@@ -2,7 +2,7 @@ package net.joshuahughes.kalmanfilter;
 
 import java.util.Random;
 
-import net.joshuahughes.kalmanfilter.source.SimpleExamplePositionVelocityAccelerationSource;
+import net.joshuahughes.kalmanfilter.source.Simple2DKinematicSource;
 import net.joshuahughes.kalmanfilter.source.Source;
 import net.joshuahughes.kalmanfilter.source.Source.Data;
 import net.joshuahughes.kalmanfilter.target.JDialogTarget;
@@ -10,13 +10,15 @@ import net.joshuahughes.kalmanfilter.target.Target;
 
 public class SimpleExample
 {
-	static Random rand = new Random(437583478);//bad1,bad2
+	static Random rand = new Random(437583478);
 	public static void main(String[] args) throws Exception
 	{
 		int timeCount = 1000;
-
-		Source source = new SimpleExamplePositionVelocityAccelerationSource(timeCount);
-		Target target = new JDialogTarget(timeCount, timeCount);
+		boolean modelVelocityOnly = false;
+		int targetCount = 16;
+		
+		Source source = new Simple2DKinematicSource(timeCount,targetCount,modelVelocityOnly);
+		Target target = new JDialogTarget(timeCount, timeCount, modelVelocityOnly);
 
 		// Using https://en.wikipedia.org/wiki/Kalman_filter#Details
 		double tk1=Double.NaN;

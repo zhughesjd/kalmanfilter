@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
 
 import net.joshuahughes.kalmanfilter.source.Source.Data;
@@ -16,16 +17,17 @@ import net.joshuahughes.kalmanfilter.source.Source.Data;
 public class JDialogTarget implements Target{
     Graphics2D g2d;
     JLabel lbl;
-    int stateCount = 6;
-    public JDialogTarget(int xSize,int ySize)
+    int stateCount;
+    public JDialogTarget(int xSize,int ySize, boolean modelVelocityOnly)
     {
+        this.stateCount = modelVelocityOnly?4:6;
         BufferedImage image = new BufferedImage(xSize,ySize,BufferedImage.TYPE_3BYTE_BGR);
         g2d = image.createGraphics();
         lbl = new JLabel(new ImageIcon(image) );
         JDialog dlg = new JDialog();
         dlg.setSize(image.getWidth()+50, image.getHeight()+50);
         dlg.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        dlg.getContentPane().add(lbl);
+        dlg.getContentPane().add(new JScrollPane(lbl));
         dlg.setVisible(true);
 
     }
@@ -51,6 +53,6 @@ public class JDialogTarget implements Target{
     public void receive(double[][] stateEstimates, double[][] estimateCovariance) {
         for(int index=0;index<stateEstimates.length/stateCount;index++)
             receive(stateEstimates[stateCount*index][0],stateEstimates[stateCount*index+1][0],eColors[index%eColors.length]);
-        try {Thread.sleep(40);} catch (InterruptedException e) {e.printStackTrace();}
+//        try {Thread.sleep(40);} catch (InterruptedException e) {e.printStackTrace();}
     }
 }
