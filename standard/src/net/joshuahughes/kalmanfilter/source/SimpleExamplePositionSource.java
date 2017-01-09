@@ -12,34 +12,56 @@ public class  SimpleExamplePositionSource extends ArrayList<Source.Data> impleme
 	int dim;
 	public SimpleExamplePositionSource(int timeCount)
 	{
-		int targetCount = 2;
+		int targetCount = 8;
 		int stateCount = 4;
-
+        boolean useVelocityMeasures = false;
+        
 		dim = targetCount*stateCount;
 		
 		Random rand = new Random(934757384);
 		ArrayList<ArrayList<Double>> generate = new ArrayList<>();
 		for(int index=0;index<timeCount;index++)generate.add(new ArrayList<>());
-		boolean useVelocityMeasures = false;
 		
 		for(int index=0;index<timeCount;index++)
 		{
-			int offset = 50;
-			int arrayPos = index+offset;
+			double offset = 50d;
+			double arrayPos = index+offset;
 			if(targetCount>=1)
 			{
 				if(index<timeCount/2)
-					generate.get(index).addAll(new ArrayList<Double>(Arrays.asList(500d,(double)arrayPos,0d,1d)));
+					generate.get(index).addAll(new ArrayList<Double>(Arrays.asList(500d,arrayPos,0d,1d)));
 				else
-					generate.get(index).addAll(new ArrayList<Double>(Arrays.asList((double)(arrayPos-offset),(double)arrayPos,1d,1d)));
+					generate.get(index).addAll(new ArrayList<Double>(Arrays.asList(arrayPos-offset,arrayPos,1d,1d)));
 			}
-			if(targetCount>=2)
-			{
-				if(index<timeCount/2)
-					generate.get(index).addAll(new ArrayList<Double>(Arrays.asList((double)arrayPos,500d,1d,0d)));
-				else
-					generate.get(index).addAll(new ArrayList<Double>(Arrays.asList((double)arrayPos,(double)(timeCount-arrayPos+offset),1d,-1d)));
-			}
+            if(targetCount>=2)
+            {
+                if(index<timeCount/2)
+                    generate.get(index).addAll(new ArrayList<Double>(Arrays.asList(arrayPos,500d,1d,0d)));
+                else
+                    generate.get(index).addAll(new ArrayList<Double>(Arrays.asList(arrayPos,timeCount-arrayPos+offset,1d,-1d)));
+            }
+            if(targetCount>=3)
+            {
+                double stoppingPosit = timeCount/3d;
+                if(arrayPos<stoppingPosit)
+                    generate.get(index).addAll(new ArrayList<Double>(Arrays.asList(arrayPos,arrayPos,1d,1d)));
+                else
+                    generate.get(index).addAll(new ArrayList<Double>(Arrays.asList(stoppingPosit,stoppingPosit,0d,0d)));
+            }
+            if(targetCount>=4)
+            {
+                double angle = index*(2d*Math.PI/timeCount);
+                double hypot = 200d;
+                double x = timeCount/2d + hypot*Math.sin(angle);
+                double y = timeCount/2d + hypot*Math.cos(angle);
+                generate.get(index).addAll(new ArrayList<Double>(Arrays.asList(x,y,0d,0d)));
+            }
+            int rest = targetCount - generate.get( index ).size( )/stateCount;
+            for(int t=0;t<rest;t++)
+            {
+                double x = (t+1d)*(timeCount/(rest+1d));
+                generate.get(index).addAll(new ArrayList<Double>(Arrays.asList(x,arrayPos,0d,1d)));
+            }
 		}
 		if(!useVelocityMeasures)
 		{
@@ -50,7 +72,7 @@ public class  SimpleExamplePositionSource extends ArrayList<Source.Data> impleme
 					generate.get(t).set(mIndex+1, 0d);
 				}
 		}
-		double oxx = 20;
+		double oxx = 30;
 		double oxy = oxx;
 		double ovx = 0;
 		double ovy = 0;
@@ -91,7 +113,7 @@ public class  SimpleExamplePositionSource extends ArrayList<Source.Data> impleme
 	}
 	@Override
 	public double[][] getQk1(double priorTime) {
-		return Utility.diagonal(dim,.000001);
+		return Utility.diagonal(dim,.0001);
 	}
 	@Override
 	public double[][] getRk(double time) {
