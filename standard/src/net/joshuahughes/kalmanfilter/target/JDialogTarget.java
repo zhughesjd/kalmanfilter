@@ -16,6 +16,7 @@ import net.joshuahughes.kalmanfilter.source.Source.Data;
 public class JDialogTarget implements Target{
     Graphics2D g2d;
     JLabel lbl;
+    int stateCount = 6;
     public JDialogTarget(int xSize,int ySize)
     {
         BufferedImage image = new BufferedImage(xSize,ySize,BufferedImage.TYPE_3BYTE_BGR);
@@ -40,16 +41,16 @@ public class JDialogTarget implements Target{
     public void receive(Data data) {
         if(data.truth!=null)
         {
-            for(int index=0;index<data.truth.length/4;index++)
-                receive(data.truth[4*index],data.truth[4*index+1],Color.white);
+            for(int index=0;index<data.truth.length/stateCount;index++)
+                receive(data.truth[stateCount*index],data.truth[stateCount*index+1],Color.white);
         }
-        for(int index=0;index<data.measurements.length/4;index++)
-            receive(data.measurements[4*index],data.measurements[4*index+1],mColors[index%mColors.length]);
+        for(int index=0;index<data.measurements.length/stateCount;index++)
+            receive(data.measurements[stateCount*index],data.measurements[stateCount*index+1],mColors[index%mColors.length]);
     }
     @Override
     public void receive(double[][] stateEstimates, double[][] estimateCovariance) {
-        for(int index=0;index<stateEstimates.length/4;index++)
-            receive(stateEstimates[4*index][0],stateEstimates[4*index+1][0],eColors[index%eColors.length]);
+        for(int index=0;index<stateEstimates.length/stateCount;index++)
+            receive(stateEstimates[stateCount*index][0],stateEstimates[stateCount*index+1][0],eColors[index%eColors.length]);
         try {Thread.sleep(40);} catch (InterruptedException e) {e.printStackTrace();}
     }
 }

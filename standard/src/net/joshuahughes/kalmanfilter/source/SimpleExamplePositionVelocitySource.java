@@ -5,16 +5,17 @@ import java.util.Random;
 
 import net.joshuahughes.kalmanfilter.Utility;
 
-public class  SimpleExamplePositionSource extends ArrayList<Source.Data> implements Source 
+public class  SimpleExamplePositionVelocitySource extends ArrayList<Source.Data> implements Source 
 {
 	private static final long serialVersionUID = 8619045911606133484L;
 	double[][] Pk0k0 = null;
 	int dim;
-	public SimpleExamplePositionSource(int timeCount)
+	int stateCount;
+	public SimpleExamplePositionVelocitySource(int timeCount)
 	{
 		int targetCount = 8;
-		int stateCount = 4;
-        boolean useVelocityMeasures = false;
+		stateCount = 4;
+        boolean useVelocityMeasures = true;
         
 		dim = targetCount*stateCount;
 		
@@ -66,13 +67,13 @@ public class  SimpleExamplePositionSource extends ArrayList<Source.Data> impleme
 		if(!useVelocityMeasures)
 		{
 			for(int t=0;t<generate.size();t++)
-				for(int mIndex=2;mIndex<generate.get(t).size();mIndex+=4)
+				for(int mIndex=2;mIndex<generate.get(t).size();mIndex+=stateCount)
 				{
 					generate.get(t).set(mIndex, 0d);
 					generate.get(t).set(mIndex+1, 0d);
 				}
 		}
-		double oxx = 30;
+		double oxx = 10;
 		double oxy = oxx;
 		double ovx = 0;
 		double ovy = 0;
@@ -97,7 +98,7 @@ public class  SimpleExamplePositionSource extends ArrayList<Source.Data> impleme
 		for(int i=0;i<dim;i++)
 		{
 			Fk[i][i] = 1;
-			if(i<dim-2 && i%4<2)
+			if(i<dim-2 && i%stateCount<2)
 			{
 				Fk[i][i+2] = dt;
 			}
@@ -106,14 +107,11 @@ public class  SimpleExamplePositionSource extends ArrayList<Source.Data> impleme
 	}
 	@Override
 	public double[][] getHk(double time) {
-		double[][] H = new double[dim][dim];
-		for(int index=0;index<dim;index++)
-			H[index][index] = 1;
-		return H;
+	       return Utility.identity(dim);
 	}
 	@Override
 	public double[][] getQk1(double priorTime) {
-		return Utility.diagonal(dim,.0001);
+		return Utility.diagonal(dim,.00001);
 	}
 	@Override
 	public double[][] getRk(double time) {

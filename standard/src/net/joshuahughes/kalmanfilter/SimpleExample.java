@@ -2,7 +2,7 @@ package net.joshuahughes.kalmanfilter;
 
 import java.util.Random;
 
-import net.joshuahughes.kalmanfilter.source.SimpleExamplePositionSource;
+import net.joshuahughes.kalmanfilter.source.SimpleExamplePositionVelocityAccelerationSource;
 import net.joshuahughes.kalmanfilter.source.Source;
 import net.joshuahughes.kalmanfilter.source.Source.Data;
 import net.joshuahughes.kalmanfilter.target.JDialogTarget;
@@ -15,7 +15,7 @@ public class SimpleExample
 	{
 		int timeCount = 1000;
 
-		Source source = new SimpleExamplePositionSource(timeCount);
+		Source source = new SimpleExamplePositionVelocityAccelerationSource(timeCount);
 		Target target = new JDialogTarget(timeCount, timeCount);
 
 		// Using https://en.wikipedia.org/wiki/Kalman_filter#Details
