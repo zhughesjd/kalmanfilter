@@ -45,6 +45,6 @@ public class JDialogTarget implements Target{
 	public void receive(double[][] stateEstimates, double[][] estimateCovariance) {
 		receive(stateEstimates[0][0],stateEstimates[1][0],Color.red);
 		receive(stateEstimates[4][0],stateEstimates[5][0],Color.green);
+		try {Thread.sleep(10);} catch (InterruptedException e) {e.printStackTrace();}
 	}
-
 }

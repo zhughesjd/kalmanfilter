@@ -17,6 +17,9 @@ public interface Source extends Iterable<Data>{
 		}
 	}
 
-	double[][] getPk0k0();
-	double[][] getFk(double dt);
+	public double[][] getPk0k0();
+	public double[][] getFk(double dt);
+	public double[][] getHk(double time);
+	public double[][] getQk1(double priorTime);
+	public double[][] getRk(double time);
 }

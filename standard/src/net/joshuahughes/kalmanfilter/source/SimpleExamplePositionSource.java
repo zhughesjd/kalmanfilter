@@ -71,4 +71,19 @@ public class  SimpleExamplePositionSource extends ArrayList<Source.Data> impleme
 		}
 		return Fk;
 	}
+	@Override
+	public double[][] getHk(double time) {
+		double[][] H = new double[dim][dim];
+		for(int index=0;index<dim;index++)
+			H[index][index] = 1;
+		return H;
+	}
+	@Override
+	public double[][] getQk1(double priorTime) {
+		return Utility.diagonal(dim,.000001);
+	}
+	@Override
+	public double[][] getRk(double time) {
+		return Utility.diagonal(dim,100);
+	}
 }
