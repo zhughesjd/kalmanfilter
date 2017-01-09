@@ -31,20 +31,24 @@ public class JDialogTarget implements Target{
         g2d.fillOval((int)x,(int)y, 5, 5);
         lbl.repaint();
 	}
+	Color[] tColors = {Color.green,Color.yellow,Color.gray,Color.gray.darker()};
+	Color[] mColors = {Color.red,Color.pink,Color.red.brighter(),Color.red.darker()};
+	Color[] eColors = {Color.magenta,Color.cyan,Color.blue,Color.orange};
+	
 	@Override
 	public void receive(Data data) {
 		if(data.truth!=null)
 		{
-			receive(data.truth[0],data.truth[1],Color.yellow);
-			receive(data.truth[4],data.truth[5],Color.white);
+			for(int index=0;index<data.truth.length/4;index++)
+				receive(data.truth[4*index],data.truth[4*index+1],tColors[index%tColors.length]);
 		}
-		receive(data.measurements[0],data.measurements[1],Color.blue);
-		receive(data.measurements[4],data.measurements[5],Color.cyan);
+		for(int index=0;index<data.measurements.length/4;index++)
+			receive(data.measurements[4*index],data.measurements[4*index+1],mColors[index%mColors.length]);
 	}
 	@Override
 	public void receive(double[][] stateEstimates, double[][] estimateCovariance) {
-		receive(stateEstimates[0][0],stateEstimates[1][0],Color.red);
-		receive(stateEstimates[4][0],stateEstimates[5][0],Color.green);
+		for(int index=0;index<stateEstimates.length/4;index++)
+			receive(stateEstimates[4*index][0],stateEstimates[4*index+1][0],eColors[index%eColors.length]);
 		try {Thread.sleep(10);} catch (InterruptedException e) {e.printStackTrace();}
 	}
 }
