@@ -149,5 +149,11 @@ public class Utility {
 			diagonal[index][index] = values[index];
 		return diagonal;
 	}
-
+	public static double[][] replace(double[][] candidate, double[][] replacement) {
+        double[][] replace = new double[candidate.length][candidate[0].length];
+        for(int x=0;x<replace.length;x++)
+            for(int y=0;y<replace[0].length;y++)
+            	replace[x][y] = Double.isNaN(candidate[x][y])?replacement[x][y]:candidate[x][y];
+        return replace;
+	}
 }

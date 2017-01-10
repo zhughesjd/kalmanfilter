@@ -1,5 +1,13 @@
 package net.joshuahughes.kalmanfilter;
 
+import static net.joshuahughes.kalmanfilter.Utility.difference;
+import static net.joshuahughes.kalmanfilter.Utility.identity;
+import static net.joshuahughes.kalmanfilter.Utility.inverse;
+import static net.joshuahughes.kalmanfilter.Utility.product;
+import static net.joshuahughes.kalmanfilter.Utility.replace;
+import static net.joshuahughes.kalmanfilter.Utility.sum;
+import static net.joshuahughes.kalmanfilter.Utility.transpose;
+
 import java.util.Random;
 
 import net.joshuahughes.kalmanfilter.source.Simple2DKinematicSource;
@@ -16,7 +24,7 @@ public class SimpleExample
 		int timeCount = 1000;
 		boolean modelVelocityOnly = false;
 		int targetCount = 16;
-		
+
 		Source source = new Simple2DKinematicSource(timeCount,targetCount,modelVelocityOnly);
 		Target target = new JDialogTarget(timeCount, timeCount, modelVelocityOnly);
 
@@ -24,11 +32,11 @@ public class SimpleExample
 		double tk1=Double.NaN;
 		double[][] xk1k1 = null;
 		double[][] Pk1k1 = null;
-		
+
 		for(Data data : source)
 		{
 			double tk = data.time;
-			double[][] zk = Utility.transpose(new double[][]{data.measurements});
+			double[][] zk = transpose(new double[][]{data.measurements});
 			target.receive(data);
 			if(Double.isNaN(tk1)) // initialize xk_0k_0 and Pk_0k_0 with first measurements
 			{
@@ -39,25 +47,21 @@ public class SimpleExample
 			{
 				double[][] Fk = source.getFk(tk-tk1);
 				double[][] Qk1 = source.getQk1(tk1);
+				double[][] Hk = source.getHk(tk);
+				double[][] HkT = transpose(Hk);
+				double[][] Rk = source.getRk(tk);
+
 				// Predict
-				double[][] xkk1 = Utility.product(Fk,xk1k1);
-				double[][] Pkk1 = Utility.sum(Utility.product(Utility.product(Fk,Pk1k1),Utility.transpose(Fk)),Qk1);
-				//Skip update if no measurements  *** this needs to be tested ***
-				if(zk.length>0)
-				{
-					double[][] Hk = source.getHk(tk);
-					double[][] HkT = Utility.transpose(Hk);
-					double[][] Rk = source.getRk(tk);
-					double[][] I = source.getIdentity();
-					//Update
-					double[][] yk = Utility.difference(zk,Utility.product(Hk,xkk1));
-					double[][] Sk = Utility.sum(Utility.product(Hk,Utility.product(Pkk1,HkT)),Rk);
-					double[][] Kk = Utility.product(Pkk1,Utility.product(HkT,Utility.inverse(Sk)));
-					double[][] xkk = Utility.sum(xkk1,Utility.product(Kk,yk));
-					double[][] Pkk = Utility.product(Utility.difference(I,Utility.product(Kk,Hk)),Pkk1);
-					xk1k1 = xkk;
-					Pk1k1 = Pkk;
-				}
+				double[][] xkk1 = product(Fk,xk1k1);
+				double[][] Pkk1 = sum(product(product(Fk,Pk1k1),transpose(Fk)),Qk1);
+				// Update
+				double[][] yk = difference(zk,product(Hk,xkk1));
+				double[][] Sk = sum(product(Hk,product(Pkk1,HkT)),Rk);
+				double[][] Kk = product(Pkk1,product(HkT,inverse(Sk)));
+				double[][] xkk = sum(xkk1,product(Kk,yk));
+				double[][] Pkk = product(difference(identity(Kk.length),product(Kk,Hk)),Pkk1);
+				xk1k1 = replace(xkk,xkk1);
+				Pk1k1 = replace(Pkk,Pkk1);
 			}
 			tk1 = tk;
 			target.receive(xk1k1,Pk1k1);

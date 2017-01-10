@@ -22,5 +22,4 @@ public interface Source extends Iterable<Data>{
 	public double[][] getHk(double time);
 	public double[][] getQk1(double priorTime);
 	public double[][] getRk(double time);
-	public double[][] getIdentity();
 }
