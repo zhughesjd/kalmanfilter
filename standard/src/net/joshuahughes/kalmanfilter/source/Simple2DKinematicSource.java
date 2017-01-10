@@ -1,13 +1,13 @@
 package net.joshuahughes.kalmanfilter.source;
 
 
+import static net.joshuahughes.kalmanfilter.Utility.identity;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
 import net.joshuahughes.kalmanfilter.Utility;
-import static net.joshuahughes.kalmanfilter.Utility.identity;
-import static net.joshuahughes.kalmanfilter.Utility.print;
 
 public class Simple2DKinematicSource extends ArrayList<Source.Data> implements Source 
 {
