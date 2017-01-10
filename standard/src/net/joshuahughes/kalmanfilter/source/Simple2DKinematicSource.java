@@ -11,6 +11,7 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
     double[][] Pk0k0 = null;
     int dim;
     int stateCount;
+    Data data0 = null;
     public Simple2DKinematicSource(int timeCount,int targetCount,boolean modelOnlyVelocity)
     {
         stateCount = modelOnlyVelocity?4:6;
@@ -90,8 +91,14 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
         for(int x=0;x<perturb.length;x++)
             for(int y=0;y<perturb[0].length;y++)
                 perturb[x][y] = truth.get(x).get(y) + sigmas[y%stateCount]*rand.nextGaussian();
-        for(int time = 0 ;time<truth.size();time++)
-            add(new Source.Data((double)time, perturb[time], truth.get(time).stream().mapToDouble(d->d.doubleValue()).toArray()));
+        for(int time = 0;time<truth.size();time++)
+        {
+        	Data data = new Data((double)time, perturb[time], truth.get(time).stream().mapToDouble(d->d.doubleValue()).toArray());
+        	if(time == 0)
+        		data0 = data;
+        	else
+        		add(data);
+        }
     }
     @Override
     public double[][] getPk0k0() {
@@ -126,5 +133,9 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
     }
     public double[][] getIdentity() {
         return Utility.identity(dim);
+    }
+    public Data getData0()
+    {
+    	return data0;
     }
 }

@@ -29,40 +29,36 @@ public class SimpleExample
 		Target target = new JDialogTarget(timeCount, timeCount, modelVelocityOnly);
 
 		// Using https://en.wikipedia.org/wiki/Kalman_filter#Details
-		double tk1=Double.NaN;
-		double[][] xk1k1 = null;
-		double[][] Pk1k1 = null;
-
+		Data data0 = source.getData0();
+		double[][] Pk1k1 = source.getPk0k0();
+		double tk1=data0.time;
+		double[][] xk1k1 = transpose(new double[][]{data0.measurements});
+		target.receive(data0);
 		for(Data data : source)
 		{
 			double tk = data.time;
 			double[][] zk = transpose(new double[][]{data.measurements});
 			target.receive(data);
-			if(Double.isNaN(tk1)) // initialize xk_0k_0 and Pk_0k_0 with first measurements
-			{
-				xk1k1 = zk;
-				Pk1k1 = source.getPk0k0();
-			}
-			else //otherwise 
-			{
-				double[][] Fk = source.getFk(tk-tk1);
-				double[][] Qk1 = source.getQk1(tk1);
-				double[][] Hk = source.getHk(tk);
-				double[][] HkT = transpose(Hk);
-				double[][] Rk = source.getRk(tk);
 
-				// Predict
-				double[][] xkk1 = product(Fk,xk1k1);
-				double[][] Pkk1 = sum(product(product(Fk,Pk1k1),transpose(Fk)),Qk1);
-				// Update
-				double[][] yk = difference(zk,product(Hk,xkk1));
-				double[][] Sk = sum(product(Hk,product(Pkk1,HkT)),Rk);
-				double[][] Kk = product(Pkk1,product(HkT,inverse(Sk)));
-				double[][] xkk = sum(xkk1,product(Kk,yk));
-				double[][] Pkk = product(difference(identity(Kk.length),product(Kk,Hk)),Pkk1);
-				xk1k1 = replace(xkk,xkk1);
-				Pk1k1 = replace(Pkk,Pkk1);
-			}
+			// Get k matricies
+			double[][] Fk = source.getFk(tk-tk1);
+			double[][] Qk1 = source.getQk1(tk1);
+			double[][] Hk = source.getHk(tk);
+			double[][] HkT = transpose(Hk);
+			double[][] Rk = source.getRk(tk);
+			
+			// Predict
+			double[][] xkk1 = product(Fk,xk1k1);
+			double[][] Pkk1 = sum(product(product(Fk,Pk1k1),transpose(Fk)),Qk1);
+
+			// Update
+			double[][] yk = difference(zk,product(Hk,xkk1));
+			double[][] Sk = sum(product(Hk,product(Pkk1,HkT)),Rk);
+			double[][] Kk = product(Pkk1,product(HkT,inverse(Sk)));
+			double[][] xkk = sum(xkk1,product(Kk,yk));
+			double[][] Pkk = product(difference(identity(Kk.length),product(Kk,Hk)),Pkk1);
+			xk1k1 = replace(xkk,xkk1);
+			Pk1k1 = replace(Pkk,Pkk1);
 			tk1 = tk;
 			target.receive(xk1k1,Pk1k1);
 		}
