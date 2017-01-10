@@ -10,6 +10,8 @@ import static net.joshuahughes.kalmanfilter.Utility.transpose;
 
 import java.util.Random;
 
+import net.joshuahughes.kalmanfilter.associator.Associator;
+import net.joshuahughes.kalmanfilter.associator.PassThroughAssociator;
 import net.joshuahughes.kalmanfilter.source.Simple2DKinematicSource;
 import net.joshuahughes.kalmanfilter.source.Source;
 import net.joshuahughes.kalmanfilter.source.Source.Data;
@@ -27,7 +29,8 @@ public class SimpleExample
 
 		Source source = new Simple2DKinematicSource(timeCount,targetCount,modelVelocityOnly);
 		Target target = new JDialogTarget(timeCount, timeCount, modelVelocityOnly);
-
+		Associator associator = new PassThroughAssociator();
+		
 		// Using https://en.wikipedia.org/wiki/Kalman_filter#Details
 		Data data0 = source.getData0();
 		double[][] Pk1k1 = source.getPk0k0();
@@ -49,8 +52,11 @@ public class SimpleExample
 			
 			// Predict
 			double[][] xkk1 = product(Fk,xk1k1);
-			double[][] Pkk1 = sum(product(product(Fk,Pk1k1),transpose(Fk)),Qk1);
+			double[][] Pkk1 = sum(product(product(Fk,Pk1k1),transpose(Fk)),Qk1);			
 
+			// Rearrange
+			zk = associator.associate(zk,xkk1,Pkk1);
+			
 			// Update
 			double[][] yk = difference(zk,product(Hk,xkk1));
 			double[][] Sk = sum(product(Hk,product(Pkk1,HkT)),Rk);
