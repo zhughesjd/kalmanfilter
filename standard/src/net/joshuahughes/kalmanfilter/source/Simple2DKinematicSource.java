@@ -1,9 +1,13 @@
 package net.joshuahughes.kalmanfilter.source;
+
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
 import net.joshuahughes.kalmanfilter.Utility;
+import static net.joshuahughes.kalmanfilter.Utility.identity;
+import static net.joshuahughes.kalmanfilter.Utility.print;
 
 public class Simple2DKinematicSource extends ArrayList<Source.Data> implements Source 
 {
@@ -106,16 +110,13 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
     }
     @Override
     public double[][] getFk(double dt) {
-        double[][] Fk = new double[dim][dim];
-        for(int i=0;i<dim;i++)
+    	double[][] Fk = identity(dim);
+    	for(int i=0;i<dim-2;i+=stateCount)
+    		Fk[i][i+2] = Fk[i+1][i+3] = dt;
+        if(stateCount==6)
         {
-            Fk[i][i] = 1;
-            if(i<dim-2 && i%stateCount<2)
-            {
-                Fk[i][i+2] = dt;
-                if(stateCount==6)
-                    Fk[i][i+4] = 2d*dt*dt;
-            }
+            for(int i=0;i<dim-4;i+=stateCount)
+            	Fk[i][i+4] = Fk[i+1][i+5] = .5*dt*dt;
         }
         return Fk;
     }
@@ -125,7 +126,7 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
     }
     @Override
     public double[][] getQk1(double priorTime) {
-        return Utility.diagonal(dim,.00001);
+        return Utility.diagonal(dim,.001);
     }
     @Override
     public double[][] getRk(double time) {
