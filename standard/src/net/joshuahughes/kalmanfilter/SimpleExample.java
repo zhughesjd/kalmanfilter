@@ -25,9 +25,9 @@ public class SimpleExample
 	{
 		int timeCount = 1000;
 
-		int targetCount = 6;//can be any positive integer
+		int targetCount = 8;//can be any positive integer
 		int observationCount = 4;// needs to be 2 or 4
-		int stateCount = 4;//needs to be 4 or 6
+		int stateCount = 6;//needs to be 4 or 6
 		
 		Source source = new Simple2DKinematicSource(timeCount,targetCount,observationCount,stateCount);
 		Target target = new JDialogTarget(timeCount, timeCount,observationCount,stateCount);

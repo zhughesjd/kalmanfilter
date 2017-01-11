@@ -95,19 +95,32 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
                     truth.get(t).set(mIndex+1, 0d);
                 }
         }
-        double oxx = 20;
+        
+        
+        double pxx = defaultProcessNoise;
+        double pxy = pxx;
+        double pvx = 0;
+        double pvy = 0;
+        double pax = 0;
+        double pay = 0;
+        double[] processSigma = new double[]{pxx,pxy,pvx,pvy,pax,pay};
+        processSigma = Arrays.copyOf( processSigma,stateCount );
+
+        double oxx = defaultObservationNoise;
         double oxy = oxx;
         double ovx = 0;
         double ovy = 0;
         double oax = 0;
         double oay = 0;
+        double[] obsSigma = new double[]{oxx,oxy,ovx,ovy,oax,oay};
+        obsSigma = Arrays.copyOf( obsSigma,stateCount );
 
-        double[] sigmas = new double[]{oxx,oxy,ovx,ovy,oax,oay};
-        sigmas = Arrays.copyOf( sigmas,stateCount );
+        
         double[][] perturb = new double[timeCount][stateCount*targetCount];
         for(int x=0;x<perturb.length;x++)
             for(int y=0;y<perturb[0].length;y++)
-                perturb[x][y] = truth.get(x).get(y) + sigmas[y%stateCount]*rand.nextGaussian();
+                perturb[x][y] = truth.get(x).get(y) + processSigma[y%stateCount]*rand.nextGaussian() +  + obsSigma[y%stateCount]*rand.nextGaussian();
+
         for(int time = 0;time<truth.size();time++)
         {
         	Data data = new Data((double)time, perturb[time], truth.get(time).stream().mapToDouble(d->d.doubleValue()).toArray());
@@ -117,17 +130,19 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
         		add(data);
         }
     }
+    double defaultProcessNoise = 10d;
+    double defaultObservationNoise = 10d;
     @Override
     public double[][] getPk0k0() {
-        return Utility.diagonal(targetCount*stateCount, .5);
+        return Utility.diagonal(targetCount*stateCount,1);
     }
     @Override
     public double[][] getQk1(double priorTime) {
-        return Utility.diagonal(targetCount*stateCount,.00001);
+        return Utility.diagonal(targetCount*stateCount,defaultProcessNoise*.000000001);
     }
     @Override
     public double[][] getRk(double time) {
-        return Utility.diagonal(targetCount*stateCount,20);
+        return Utility.diagonal(targetCount*stateCount,defaultObservationNoise);
     }
     @Override
     public double[][] getFk(double dt) {

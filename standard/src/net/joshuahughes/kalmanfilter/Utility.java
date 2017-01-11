@@ -9,6 +9,18 @@ import org.apache.commons.math3.linear.LUDecomposition;
 public class Utility {
 	public static Random rand = new Random(9832927l);
 	public static double invalid = 10000000d;
+    public static double[][] sum( double[][] s0, double s1 )
+    {
+        double[][] sum = new double[s0.length][s0[0].length];
+        for(int x=0;x<sum.length;x++)
+            for(int y=0;y<sum[0].length;y++)
+                sum[x][y] = s0[x][y] + s1;
+        return sum;
+    }
+    public static double[][] sum( double s1, double[][] s0 )
+    {
+        return sum(s0,s1);
+    }
     public static double[][] sum( double[][] s0, double[][] s1 )
     {
         double[][] sum = new double[s0.length][s0[0].length];
