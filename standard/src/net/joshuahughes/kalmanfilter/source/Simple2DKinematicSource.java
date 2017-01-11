@@ -13,15 +13,15 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
 {
     private static final long serialVersionUID = 8619045911606133484L;
     double[][] Pk0k0 = null;
-    int dim;
-    int stateCount;
     Data data0 = null;
-    public Simple2DKinematicSource(int timeCount,int targetCount,boolean modelOnlyVelocity)
+    int targetCount;
+    int observationCount;
+    int stateCount;
+    public Simple2DKinematicSource(int timeCount,int targetCount,int observationCount,int stateCount)
     {
-        stateCount = modelOnlyVelocity?4:6;
-        boolean useVelocityMeasures = true;
-
-        dim = targetCount*stateCount;
+        this.targetCount = targetCount;
+        this.observationCount = observationCount;
+        this.stateCount = stateCount;
 
         Random rand = new Random(934757384);
         ArrayList<ArrayList<Double>> truth = new ArrayList<>();
@@ -86,7 +86,7 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
                     truth.get(index).addAll(Arrays.asList(0d,0d));
             }
         }
-        if(!useVelocityMeasures)
+        if(observationCount==2)
         {
             for(int t=0;t<truth.size();t++)
                 for(int mIndex=2;mIndex<truth.get(t).size();mIndex+=stateCount)
@@ -95,7 +95,7 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
                     truth.get(t).set(mIndex+1, 0d);
                 }
         }
-        double oxx = 30;
+        double oxx = 20;
         double oxy = oxx;
         double ovx = 0;
         double ovy = 0;
@@ -119,41 +119,39 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
     }
     @Override
     public double[][] getPk0k0() {
-        return Utility.diagonal(dim, .5);
+        return Utility.diagonal(targetCount*stateCount, .5);
+    }
+    @Override
+    public double[][] getQk1(double priorTime) {
+        return Utility.diagonal(targetCount*stateCount,.00001);
+    }
+    @Override
+    public double[][] getRk(double time) {
+        return Utility.diagonal(targetCount*stateCount,20);
     }
     @Override
     public double[][] getFk(double dt) {
-    	//Position model entries
-    	double[][] Fk = identity(dim);
-    	//Velocity model entries
-    	for(int i=0;i<dim-2;i+=stateCount)
-    	{
-    		Fk[i][i+2] = Fk[i+1][i+3] = Fk[i+2][i+4] = Fk[i+3][i+5] = dt;
-    	}
-    	//Acceleration model entries
+        //Position model entries
+        double[][] Fk = identity(targetCount*stateCount);
+        //Velocity model entries
+        for(int i=0;i<Fk.length-2;i+=stateCount)
+        {
+            Fk[i][i+2] = Fk[i+1][i+3] = dt;
+            if(stateCount==6) Fk[i+2][i+4] = Fk[i+3][i+5] = dt;
+        }
+        //Acceleration model entries
         if(stateCount==6)
         {
-            for(int i=0;i<dim-4;i+=stateCount)
+            for(int i=0;i<Fk.length-4;i+=stateCount)
             {
-            	Fk[i][i+4] = Fk[i+1][i+5] = .5*dt*dt;
+                Fk[i][i+4] = Fk[i+1][i+5] = .5*dt*dt;
             }
         }
         return Fk;
     }
     @Override
     public double[][] getHk(double time) {
-        return Utility.identity(dim);
-    }
-    @Override
-    public double[][] getQk1(double priorTime) {
-        return Utility.diagonal(dim,.0000000001);
-    }
-    @Override
-    public double[][] getRk(double time) {
-        return Utility.diagonal(dim,10);
-    }
-    public double[][] getIdentity() {
-        return Utility.identity(dim);
+        return Utility.identity(targetCount*stateCount);
     }
     public Data getData0()
     {

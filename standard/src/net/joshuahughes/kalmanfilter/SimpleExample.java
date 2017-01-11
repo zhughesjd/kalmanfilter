@@ -24,23 +24,25 @@ public class SimpleExample
 	public static void main(String[] args) throws Exception
 	{
 		int timeCount = 1000;
-		boolean modelVelocityOnly = false;
-		int targetCount = 8;
 
-		Source source = new Simple2DKinematicSource(timeCount,targetCount,modelVelocityOnly);
-		Target target = new JDialogTarget(timeCount, timeCount, modelVelocityOnly);
+		int targetCount = 6;//can be any positive integer
+		int observationCount = 4;// needs to be 2 or 4
+		int stateCount = 4;//needs to be 4 or 6
+		
+		Source source = new Simple2DKinematicSource(timeCount,targetCount,observationCount,stateCount);
+		Target target = new JDialogTarget(timeCount, timeCount,observationCount,stateCount);
 		Associator associator = new PassThroughAssociator();
 		
 		// Using https://en.wikipedia.org/wiki/Kalman_filter#Details
 		Data data0 = source.getData0();
 		double[][] Pk1k1 = source.getPk0k0();
 		double tk1=data0.time;
-		double[][] xk1k1 = transpose(new double[][]{data0.measurements});
+		double[][] xk1k1 = transpose(new double[][]{data0.observations});
 		target.receive(data0);
 		for(Data data : source)
 		{
 			double tk = data.time;
-			double[][] zk = transpose(new double[][]{data.measurements});
+			double[][] zk = transpose(new double[][]{data.observations});
 			target.receive(data);
 
 			// Get k matricies
