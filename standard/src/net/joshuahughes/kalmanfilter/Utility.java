@@ -44,7 +44,7 @@ public class Utility {
     {
         double sum = 0;
         int dim1 = m1.length;
-        int midDim = m2.length;
+        int midDim = Math.max(m1[0].length,m2.length);
         int dim2 = m2[0].length;
         double[][] product = new double[dim1][dim2];
         for (int c = 0; c < dim1; c++) {
