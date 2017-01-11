@@ -33,6 +33,7 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
             double arrayPos = index+offset;
             for(int tIndex=0;tIndex<targetCount;tIndex++)
             {
+            	//Increase only y then turn at 45 degrees
                 if(tIndex==0)
                 {
                     if(index<timeCount/2)
@@ -40,6 +41,7 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
                     else
                         truth.get(index).addAll(Arrays.asList(arrayPos-offset,arrayPos,1d,1d));
                 }
+            	//Increase only x then turn at 45 degrees
                 if(tIndex==1)
                 {
                     if(index<timeCount/2)
@@ -47,6 +49,7 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
                     else
                         truth.get(index).addAll(Arrays.asList(arrayPos,timeCount-arrayPos+offset,1d,-1d));
                 }
+                //Travel a distance then stop
                 if(tIndex==2)
                 {
                     double stoppingPosit = timeCount/3d;
@@ -55,14 +58,22 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
                     else
                         truth.get(index).addAll(Arrays.asList(stoppingPosit,stoppingPosit,0d,0d));
                 }
+                //Travel in a circular path
                 if(tIndex==3)
                 {
-                    double angle = index*(2d*Math.PI/timeCount);
-                    double hypot = 200d;
-                    double x = timeCount/2d + hypot*Math.sin(angle);
-                    double y = timeCount/2d + hypot*Math.cos(angle);
+                	//Here observations are given only if conditions are met
+                	double x = Double.NaN;
+                	double y = Double.NaN;
+                	if(index<.3d*timeCount || .4d*timeCount<index)
+                	{
+	                    double angle = index*(2d*Math.PI/timeCount);
+	                    double hypot = 200d;
+	                    x = timeCount/2d + hypot*Math.sin(angle);
+	                    y = timeCount/2d + hypot*Math.cos(angle);
+                	}
                     truth.get(index).addAll(Arrays.asList(x,y,0d,0d));
                 }
+            	//Increase have only y increase
                 if(tIndex>=4)
                 {
                     int rest = targetCount - 4;

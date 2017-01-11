@@ -54,7 +54,7 @@ public class SimpleExample
 			double[][] xkk1 = product(Fk,xk1k1);
 			double[][] Pkk1 = sum(product(product(Fk,Pk1k1),transpose(Fk)),Qk1);			
 
-			// Rearrange
+			// Associate by Rearranging
 			zk = associator.associate(zk,xkk1,Pkk1);
 			
 			// Update
