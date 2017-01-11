@@ -14,7 +14,8 @@ import javax.swing.WindowConstants;
 
 import net.joshuahughes.kalmanfilter.source.Source.Data;
 
-public class JDialogTarget implements Target{
+public class JDialogTarget extends JDialog implements Target{
+    private static final long serialVersionUID = 8982418677492822173L;
     BufferedImage estimateImage;
     BufferedImage measurementImage;
     BufferedImage truthImage;
@@ -30,11 +31,10 @@ public class JDialogTarget implements Target{
 		truthImage = new BufferedImage(xSize,ySize,BufferedImage.TYPE_4BYTE_ABGR);
 		combinedImage = new BufferedImage( truthImage.getWidth( ),truthImage.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
 		lbl = new JLabel(new ImageIcon( combinedImage ) );
-		JDialog dlg = new JDialog();
-		dlg.setSize(truthImage.getWidth()+50, truthImage.getHeight()+50);
-		dlg.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		dlg.getContentPane().add(new JScrollPane(lbl));
-		dlg.setVisible(true);
+		setSize(truthImage.getWidth()+50, truthImage.getHeight()+50);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		getContentPane().add(new JScrollPane(lbl));
+		setVisible(true);
 	}
 	public void receive(double x,double y, Color color, Graphics2D g2d)
 	{
