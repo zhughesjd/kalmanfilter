@@ -25,7 +25,7 @@ public class SimpleExample
 	{
 		int timeCount = 1000;
 		boolean modelVelocityOnly = false;
-		int targetCount = 24;
+		int targetCount = 8;
 
 		Source source = new Simple2DKinematicSource(timeCount,targetCount,modelVelocityOnly);
 		Target target = new JDialogTarget(timeCount, timeCount, modelVelocityOnly);
