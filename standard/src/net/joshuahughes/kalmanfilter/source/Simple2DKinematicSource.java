@@ -19,7 +19,7 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
     public Simple2DKinematicSource(int timeCount,int targetCount,boolean modelOnlyVelocity)
     {
         stateCount = modelOnlyVelocity?4:6;
-        boolean useVelocityMeasures = false;
+        boolean useVelocityMeasures = true;
 
         dim = targetCount*stateCount;
 
@@ -29,7 +29,7 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
 
         for(int index=0;index<timeCount;index++)
         {
-            double offset = 50d;
+            double offset = 0;
             double arrayPos = index+offset;
             for(int tIndex=0;tIndex<targetCount;tIndex++)
             {
@@ -64,7 +64,8 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
                 	//Here observations are given only if conditions are met
                 	double x = Double.NaN;
                 	double y = Double.NaN;
-                	if(index<.3d*timeCount || .4d*timeCount<index)
+                	//Uncomment the next line in order to skip some observations
+                	//if(index<.25d*timeCount || .5d*timeCount<index)
                 	{
 	                    double angle = index*(2d*Math.PI/timeCount);
 	                    double hypot = 200d;
@@ -78,7 +79,8 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
                 {
                     int rest = targetCount - 4;
                     double x = (tIndex-4+1d)*(timeCount/(rest+1d));
-                    truth.get(index).addAll(Arrays.asList(x,arrayPos,0d,1d));
+                    double y = tIndex%2 == 1?arrayPos:timeCount - arrayPos;
+                    truth.get(index).addAll(Arrays.asList(x,y,0d,1d));
                 }
                 if(stateCount == 6)
                     truth.get(index).addAll(Arrays.asList(0d,0d));
@@ -93,7 +95,7 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
                     truth.get(t).set(mIndex+1, 0d);
                 }
         }
-        double oxx = 10;
+        double oxx = 30;
         double oxy = oxx;
         double ovx = 0;
         double ovy = 0;
@@ -121,13 +123,20 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
     }
     @Override
     public double[][] getFk(double dt) {
+    	//Position model entries
     	double[][] Fk = identity(dim);
+    	//Velocity model entries
     	for(int i=0;i<dim-2;i+=stateCount)
-    		Fk[i][i+2] = Fk[i+1][i+3] = dt;
+    	{
+    		Fk[i][i+2] = Fk[i+1][i+3] = Fk[i+2][i+4] = Fk[i+3][i+5] = dt;
+    	}
+    	//Acceleration model entries
         if(stateCount==6)
         {
             for(int i=0;i<dim-4;i+=stateCount)
+            {
             	Fk[i][i+4] = Fk[i+1][i+5] = .5*dt*dt;
+            }
         }
         return Fk;
     }
@@ -137,11 +146,11 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
     }
     @Override
     public double[][] getQk1(double priorTime) {
-        return Utility.diagonal(dim,.001);
+        return Utility.diagonal(dim,.0000000001);
     }
     @Override
     public double[][] getRk(double time) {
-        return Utility.diagonal(dim,100);
+        return Utility.diagonal(dim,10);
     }
     public double[][] getIdentity() {
         return Utility.identity(dim);

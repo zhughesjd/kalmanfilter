@@ -8,6 +8,7 @@ import org.apache.commons.math3.linear.LUDecomposition;
 
 public class Utility {
 	public static Random rand = new Random(9832927l);
+	public static double invalid = 10000000d;
     public static double[][] sum( double[][] s0, double[][] s1 )
     {
         double[][] sum = new double[s0.length][s0[0].length];
@@ -49,7 +50,8 @@ public class Utility {
         for (int c = 0; c < dim1; c++) {
             for (int d = 0; d < dim2; d++) {
               for (int k = 0; k < midDim; k++) {
-                sum = sum + m1[c][k]*m2[k][d];
+            	  if(Double.isFinite(m1[c][k]) && Double.isFinite(m2[k][d]))
+            		  sum = sum + m1[c][k]*m2[k][d];
               }
        
               product[c][d] = sum;
