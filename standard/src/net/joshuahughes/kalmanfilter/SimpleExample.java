@@ -11,7 +11,7 @@ import static net.joshuahughes.kalmanfilter.Utility.transpose;
 import java.util.Random;
 
 import net.joshuahughes.kalmanfilter.associator.Associator;
-import net.joshuahughes.kalmanfilter.associator.PassThroughAssociator;
+import net.joshuahughes.kalmanfilter.associator.SimpleAssociator;
 import net.joshuahughes.kalmanfilter.source.Simple2DKinematicSource;
 import net.joshuahughes.kalmanfilter.source.Source;
 import net.joshuahughes.kalmanfilter.source.Source.Data;
@@ -31,7 +31,7 @@ public class SimpleExample
 		
 		Source source = new Simple2DKinematicSource(timeCount,targetCount,observationCount,stateCount);
 		Target target = new JDialogTarget(timeCount, timeCount,observationCount,stateCount);
-		Associator associator = new PassThroughAssociator();
+		Associator associator = new SimpleAssociator(observationCount,stateCount);
 		
 		// Using https://en.wikipedia.org/wiki/Kalman_filter#Details
 		Data data0 = source.getData0();

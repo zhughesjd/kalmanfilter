@@ -65,6 +65,6 @@ public class JDialogTarget extends JDialog implements Target{
         Graphics2D g2d = combinedImage.createGraphics( );
         Arrays.asList( new BufferedImage( truthImage.getWidth( ),truthImage.getHeight(), BufferedImage.TYPE_3BYTE_BGR),measurementImage,truthImage,estimateImage ).stream( ).forEach( img->g2d.drawImage( img, 0, 0, null ));
         lbl.repaint( );
-        try {Thread.sleep(40);} catch (InterruptedException e) {e.printStackTrace();}
+//        try {Thread.sleep(40);} catch (InterruptedException e) {e.printStackTrace();}
     }
 }
