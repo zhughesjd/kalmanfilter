@@ -1,14 +1,18 @@
 package net.joshuahughes.kalmanfilter.target;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
 
@@ -16,26 +20,31 @@ import net.joshuahughes.kalmanfilter.source.Source.Data;
 
 public class JDialogTarget extends JDialog implements Target{
     private static final long serialVersionUID = 8982418677492822173L;
-    BufferedImage estimateImage;
-    BufferedImage measurementImage;
-    BufferedImage truthImage;
-    BufferedImage combinedImage;
+    public static enum Type{recent_obs,all_obs,truth,estimates; JCheckBox box = new JCheckBox( this.name( ),true); BufferedImage image;};
     JLabel lbl;
     int observationCount;
     int stateCount;
     boolean grayMeasurement = true;
+    BufferedImage combinedImage;
     public JDialogTarget(int xSize,int ySize,int observationCount,int stateCount)
     {
         this.observationCount = observationCount;
         this.stateCount = stateCount;
-        estimateImage = new BufferedImage(xSize,ySize,BufferedImage.TYPE_4BYTE_ABGR);
-        measurementImage = new BufferedImage(xSize,ySize,BufferedImage.TYPE_4BYTE_ABGR);
-        truthImage = new BufferedImage(xSize,ySize,BufferedImage.TYPE_4BYTE_ABGR);
-        combinedImage = new BufferedImage( truthImage.getWidth( ),truthImage.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+        combinedImage = new BufferedImage( xSize,ySize, BufferedImage.TYPE_4BYTE_ABGR);
         lbl = new JLabel(new ImageIcon( combinedImage ) );
-        setSize(truthImage.getWidth()+50, truthImage.getHeight()+50);
+        setSize(combinedImage.getWidth()+50, combinedImage.getHeight()+50);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        getContentPane().add(new JScrollPane(lbl));
+        JPanel contentPane = new JPanel(new BorderLayout());
+        contentPane.add(new JScrollPane(lbl),BorderLayout.CENTER);
+        JPanel westPanel = new JPanel(new GridLayout(Type.values( ).length,1));
+        for(Type type : Type.values( ))
+        {
+            type.image = new BufferedImage(xSize,ySize,BufferedImage.TYPE_4BYTE_ABGR);
+            type.box.addActionListener( l->reset() );
+            westPanel.add( type.box );
+        }
+        contentPane.add(westPanel,BorderLayout.WEST);
+        setContentPane( contentPane );
         setVisible(true);
     }
     public void receive(double x,double y, Color color, Graphics2D g2d)
@@ -53,18 +62,35 @@ public class JDialogTarget extends JDialog implements Target{
         if(data.truth!=null)
         {
             for(int index=0;index<data.truth.length;index+=stateCount)
-                receive(data.truth[index][0],data.truth[index+1][0],Color.white,truthImage.createGraphics( ));
+                receive(data.truth[index][0],data.truth[index+1][0],Color.white,Type.truth.image.createGraphics( ));
         }
+        Graphics2D g2d = Type.recent_obs.image.createGraphics( );
+        g2d.setColor( new Color(0,0,0,0) );
+        g2d.clearRect( 0, 0, Type.recent_obs.image.getWidth( ), Type.recent_obs.image.getHeight( ) );
         for(int index=0;index<data.observations.length;index+=stateCount)
-            receive(data.observations[index][0],data.observations[index+1][0],mColors[index%mColors.length],measurementImage.createGraphics( ));
+        {
+            receive(data.observations[index][0],data.observations[index+1][0],mColors[index%mColors.length],Type.all_obs.image.createGraphics( ));
+            receive(data.observations[index][0],data.observations[index+1][0],mColors[index%mColors.length],Type.recent_obs.image.createGraphics( ));
+        }
+        reset();
     }
     @Override
     public void receive(double[][] stateEstimates, double[][] estimateCovariance) {
         for(int index=0;index<stateEstimates.length;index+=stateCount)
-            receive(stateEstimates[index][0],stateEstimates[index+1][0],eColors[index%eColors.length],estimateImage.createGraphics( ));
+        {
+            receive(stateEstimates[index][0],stateEstimates[index+1][0],eColors[index%eColors.length],Type.estimates.image.createGraphics( ));
+        }
+        reset();
+        try {Thread.sleep(100);} catch (InterruptedException e) {e.printStackTrace();}
+    }
+    public void reset()
+    {
         Graphics2D g2d = combinedImage.createGraphics( );
-        Arrays.asList( new BufferedImage( truthImage.getWidth( ),truthImage.getHeight(), BufferedImage.TYPE_3BYTE_BGR),measurementImage,truthImage,estimateImage ).stream( ).forEach( img->g2d.drawImage( img, 0, 0, null ));
+        g2d.setColor( new Color(0,0,0,0) );
+        g2d.clearRect( 0, 0, combinedImage.getWidth( ), combinedImage.getHeight( ) );
+        for(Type type : Type.values( ))
+            if(type.box.isSelected( ))
+                combinedImage.createGraphics( ).drawImage( type.image, 0, 0, null );
         lbl.repaint( );
-//        try {Thread.sleep(40);} catch (InterruptedException e) {e.printStackTrace();}
     }
 }

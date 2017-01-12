@@ -13,20 +13,24 @@ import net.joshuahughes.kalmanfilter.Utility;
 public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> implements Source 
 {
     private static final long serialVersionUID = 8619045911606133484L;
+    Random rand = new Random(934757384);
     double[][] Pk0k0 = null;
     Data data0 = null;
     int timeCount;
     int targetCount;
     int observationCount;
     int stateCount;
+    int obsSwapCount;
     public Simple2DKinematicSource(int timeCount,int targetCount,int observationCount,int stateCount,int obsSwapCount)
     {
     	this.timeCount = timeCount;
         this.targetCount = targetCount;
         this.observationCount = observationCount;
         this.stateCount = stateCount;
-
-        Random rand = new Random(934757384);
+        this.obsSwapCount = obsSwapCount;
+    }
+    public void compute()
+    {
         ArrayList<ArrayList<Double>> truth = new ArrayList<>();
         for(int index=0;index<timeCount;index++)truth.add(new ArrayList<>());
 
@@ -90,15 +94,15 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
         		add(data);
         }
     }
-    double defaultProcessNoise = 10d;
-    double defaultObservationNoise = 10d;
+    double defaultProcessNoise = 20d;
+    double defaultObservationNoise = 20d;
     @Override
     public double[][] getPk0k0() {
         return Utility.diagonal(targetCount*stateCount,1);
     }
     @Override
     public double[][] getQk1(double priorTime) {
-        return Utility.diagonal(targetCount*stateCount,defaultProcessNoise*.000000001);
+        return Utility.diagonal(targetCount*stateCount,defaultProcessNoise*.00000000001);
     }
     @Override
     public double[][] getRk(double time) {
