@@ -8,8 +8,6 @@ import static net.joshuahughes.kalmanfilter.Utility.replace;
 import static net.joshuahughes.kalmanfilter.Utility.sum;
 import static net.joshuahughes.kalmanfilter.Utility.transpose;
 
-import java.util.Random;
-
 import net.joshuahughes.kalmanfilter.associator.Associator;
 import net.joshuahughes.kalmanfilter.associator.HungarianAssociator;
 import net.joshuahughes.kalmanfilter.associator.PassThroughAssociator;
@@ -21,14 +19,13 @@ import net.joshuahughes.kalmanfilter.target.Target;
 
 public class SimpleExample
 {
-	static Random rand = new Random(437583478);
 	public static void main(String[] args) throws Exception
 	{
 		int timeCount = 1000;//can be any positive integer
 		int targetCount = 16;//can be any positive integer
 		int observationCount = 4;// needs to be 2 or 4
 		int stateCount = 6;//needs to be 4 or 6
-		int obsSwapCount = 10;
+		int obsSwapCount = 10;//can be any non-negative number
 
 		Source source = new VariousKinematicSource(timeCount,targetCount,observationCount,stateCount,obsSwapCount);
 		Target target = new JDialogTarget(timeCount, timeCount,observationCount,stateCount);
@@ -38,12 +35,12 @@ public class SimpleExample
 		Data data0 = source.getData0();
 		double[][] Pk1k1 = source.getPk0k0();
 		double tk1=data0.time;
-		double[][] xk1k1 = transpose(new double[][]{data0.observations});
+		double[][] xk1k1 = data0.observations;
 		target.receive(data0);
 		for(Data data : source)
 		{
 			double tk = data.time;
-			double[][] zk = transpose(new double[][]{data.observations});
+			double[][] zk = data.observations;
 			target.receive(data);
 
 			// Get k matricies

@@ -2,54 +2,8 @@ package net.joshuahughes.kalmanfilter.associator;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.IntStream;
 
-import net.joshuahughes.kalmanfilter.Utility;
-
-/* Copyright (c) 2012 Kevin L. Stern
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
-/**
- * An implementation of the Hungarian algorithm for solving the assignment
- * problem. An instance of the assignment problem consists of a number of
- * workers along with a number of jobs and a cost matrix which gives the cost of
- * assigning the i'th worker to the j'th job at position (i, j). The goal is to
- * find an assignment of workers to jobs so that no job is assigned more than
- * one worker and so that no worker is assigned to more than one job in such a
- * manner so as to minimize the total cost of completing the jobs.
- * <p>
- * 
- * An assignment for a cost matrix that has more workers than jobs will
- * necessarily include unassigned workers, indicated by an assignment value of
- * -1; in no other circumstance will there be unassigned workers. Similarly, an
- * assignment for a cost matrix that has more jobs than workers will necessarily
- * include unassigned jobs; in no other circumstance will there be unassigned
- * jobs. For completeness, an assignment for a square cost matrix will give
- * exactly one unique worker to each job.
- * <p>
- * 
- * This version of the Hungarian algorithm runs in time O(n^3), where n is the
- * maximum among the number of workers and the number of jobs.
- * 
- * @author Kevin L. Stern
- */
 public class HungarianAlgorithm {
   private final double[][] costMatrix;
   private final int rows, cols, dim;
@@ -334,14 +288,17 @@ public class HungarianAlgorithm {
       double[][] costMatrix = new double[17][16];
       for(int y=0;y<costMatrix[0].length;y++)
           for(int x=0;x<costMatrix.length;x++)
-              costMatrix[x][y] = rand.nextDouble( ) + 10;
-      costMatrix[1][11] = 3;
+              costMatrix[x][y] = rand.nextDouble( ) + Double.MAX_VALUE;
       costMatrix[0][13] = 3.5;
+      costMatrix[1][11] = 3;
+      costMatrix[2][0] = 1;
       costMatrix[3][12] = 3;
       costMatrix[6][1] = 2;
-      costMatrix[2][0] = 1;
-      Utility.print( costMatrix);
+      
       HungarianAlgorithm alg = new HungarianAlgorithm( costMatrix );
+      int[] array = IntStream.rangeClosed(0, Math.max(costMatrix.length,costMatrix[0].length)).toArray();
+      
+      System.out.println(Arrays.toString( array ));
       System.out.println(Arrays.toString( alg.execute( ) ));
   }
 }

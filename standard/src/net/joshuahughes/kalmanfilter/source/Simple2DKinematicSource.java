@@ -1,5 +1,6 @@
 package net.joshuahughes.kalmanfilter.source;
 
+import static net.joshuahughes.kalmanfilter.Utility.transpose;
 import static net.joshuahughes.kalmanfilter.Utility.identity;
 import static net.joshuahughes.kalmanfilter.Utility.swap;
 
@@ -78,7 +79,11 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
         {
             for(int exIndex=0;exIndex<obsSwapCount;exIndex++)
             	swap(perturb[time],rand.nextInt(targetCount)*stateCount,rand.nextInt(targetCount)*stateCount,stateCount);
-        	Data data = new Data((double)time, perturb[time], truth.get(time).stream().mapToDouble(d->d.doubleValue()).toArray());
+        	Data data = new Data(
+        			(double)time,
+        			transpose(new double[][]{perturb[time]}),
+        			transpose( new double[][]{truth.get(time).stream().mapToDouble(d->d.doubleValue()).toArray()}
+        	));
         	if(time == 0)
         		data0 = data;
         	else

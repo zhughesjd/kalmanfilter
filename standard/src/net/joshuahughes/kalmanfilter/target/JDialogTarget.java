@@ -53,10 +53,10 @@ public class JDialogTarget extends JDialog implements Target{
         if(data.truth!=null)
         {
             for(int index=0;index<data.truth.length;index+=stateCount)
-                receive(data.truth[index],data.truth[index+1],Color.white,truthImage.createGraphics( ));
+                receive(data.truth[index][0],data.truth[index+1][0],Color.white,truthImage.createGraphics( ));
         }
         for(int index=0;index<data.observations.length;index+=stateCount)
-            receive(data.observations[index],data.observations[index+1],mColors[index%mColors.length],measurementImage.createGraphics( ));
+            receive(data.observations[index][0],data.observations[index+1][0],mColors[index%mColors.length],measurementImage.createGraphics( ));
     }
     @Override
     public void receive(double[][] stateEstimates, double[][] estimateCovariance) {

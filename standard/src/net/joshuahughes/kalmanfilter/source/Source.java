@@ -5,14 +5,14 @@ import net.joshuahughes.kalmanfilter.source.Source.Data;
 public interface Source extends Iterable<Data>{
 	public static class Data{
 		public double time = Double.NaN;
-		public double[] observations = null;
-		public double[] truth = null;
-		public Data(double time, double[] measurements) {
-			this(time,measurements,null);
+		public double[][] observations = null;
+		public double[][] truth = null;
+		public Data(double time, double[][] observations) {
+			this(time,observations,null);
 		}
-		public Data(double time, double[] measurements,double[] truth) {
+		public Data(double time, double[][] observations,double[][] truth) {
 			this.time = time;
-			this.observations = measurements;
+			this.observations = observations;
 			this.truth = truth;
 		}
 	}

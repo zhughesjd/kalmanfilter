@@ -150,10 +150,10 @@ public class Utility {
     {
         System.out.println("-------------");
         for(String s : strings)
-            System.out.println(s);
-        System.out.println(matrix.length+"\t"+matrix[0].length);
-        for(double[] array : matrix)
-            System.out.println(Arrays.toString( array ));
+            System.out.print(s);
+        System.out.println(" - dim: "+matrix.length+" x "+matrix[0].length);
+//        for(double[] array : matrix)
+//            System.out.println(Arrays.toString( array ));
     }
 	public static double[][] diagonal(double... values) {
 		double[][] diagonal = new double[values.length][values.length];
