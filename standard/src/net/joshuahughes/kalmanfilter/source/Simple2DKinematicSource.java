@@ -1,7 +1,7 @@
 package net.joshuahughes.kalmanfilter.source;
 
-
 import static net.joshuahughes.kalmanfilter.Utility.identity;
+import static net.joshuahughes.kalmanfilter.Utility.swap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +17,7 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
     int targetCount;
     int observationCount;
     int stateCount;
-    public Simple2DKinematicSource(int timeCount,int targetCount,int observationCount,int stateCount)
+    public Simple2DKinematicSource(int timeCount,int targetCount,int observationCount,int stateCount,int obsSwapCount)
     {
         this.targetCount = targetCount;
         this.observationCount = observationCount;
@@ -120,9 +120,12 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
         for(int x=0;x<perturb.length;x++)
             for(int y=0;y<perturb[0].length;y++)
                 perturb[x][y] = truth.get(x).get(y) + processSigma[y%stateCount]*rand.nextGaussian() +  + obsSigma[y%stateCount]*rand.nextGaussian();
-
+        
+        	
         for(int time = 0;time<truth.size();time++)
         {
+            for(int exIndex=0;exIndex<obsSwapCount;exIndex++)
+            	swap(perturb[time],rand.nextInt(targetCount)*stateCount,rand.nextInt(targetCount)*stateCount,stateCount);
         	Data data = new Data((double)time, perturb[time], truth.get(time).stream().mapToDouble(d->d.doubleValue()).toArray());
         	if(time == 0)
         		data0 = data;

@@ -331,12 +331,15 @@ public class HungarianAlgorithm {
   public static void main(String[] args)
   {
       Random rand = new Random(980980987);
-      double[][] costMatrix = new double[24][23];
+      double[][] costMatrix = new double[17][16];
       for(int y=0;y<costMatrix[0].length;y++)
           for(int x=0;x<costMatrix.length;x++)
-              costMatrix[x][y] = rand.nextDouble( );
-//      int i=100;
-//      for(int x=0;x<costMatrix.length;x++) costMatrix[x][x] = 0;
+              costMatrix[x][y] = rand.nextDouble( ) + 10;
+      costMatrix[1][11] = 3;
+      costMatrix[0][13] = 3.5;
+      costMatrix[3][12] = 3;
+      costMatrix[6][1] = 2;
+      costMatrix[2][0] = 1;
       Utility.print( costMatrix);
       HungarianAlgorithm alg = new HungarianAlgorithm( costMatrix );
       System.out.println(Arrays.toString( alg.execute( ) ));

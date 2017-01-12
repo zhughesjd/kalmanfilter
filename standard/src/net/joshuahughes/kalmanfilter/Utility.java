@@ -72,8 +72,6 @@ public class Utility {
         }
         return product;
     }
-
-    
     public static double[][] getRk( int dim1, int dim2 )
     {
         int iDim = dim1*dim2;
@@ -169,5 +167,11 @@ public class Utility {
             for(int y=0;y<replace[0].length;y++)
             	replace[x][y] = Double.isNaN(candidate[x][y])?replacement[x][y]:candidate[x][y];
         return replace;
+	}
+	public static void swap(double[] vector, int sv0, int sv1,int svLength)
+	{
+		double[] s0 = Arrays.copyOfRange(vector, sv0, sv0+svLength);
+		double[] s1 = Arrays.copyOfRange(vector, sv1, sv1+svLength);
+		for(int index=0;index<svLength;vector[sv1+index] = s0[index],vector[sv0+index] = s1[index],index++);
 	}
 }

@@ -11,7 +11,8 @@ import static net.joshuahughes.kalmanfilter.Utility.transpose;
 import java.util.Random;
 
 import net.joshuahughes.kalmanfilter.associator.Associator;
-import net.joshuahughes.kalmanfilter.associator.SimpleAssociator;
+import net.joshuahughes.kalmanfilter.associator.HungarianAssociator;
+import net.joshuahughes.kalmanfilter.associator.PassThroughAssociator;
 import net.joshuahughes.kalmanfilter.source.Simple2DKinematicSource;
 import net.joshuahughes.kalmanfilter.source.Source;
 import net.joshuahughes.kalmanfilter.source.Source.Data;
@@ -25,13 +26,13 @@ public class SimpleExample
 	{
 		int timeCount = 1000;
 
-		int targetCount = 8;//can be any positive integer
+		int targetCount = 16;//can be any positive integer
 		int observationCount = 4;// needs to be 2 or 4
 		int stateCount = 6;//needs to be 4 or 6
-		
-		Source source = new Simple2DKinematicSource(timeCount,targetCount,observationCount,stateCount);
+		int obsSwapCount = 10;
+		Source source = new Simple2DKinematicSource(timeCount,targetCount,observationCount,stateCount,obsSwapCount);
 		Target target = new JDialogTarget(timeCount, timeCount,observationCount,stateCount);
-		Associator associator = new SimpleAssociator(observationCount,stateCount);
+		Associator associator = obsSwapCount <= 0?new PassThroughAssociator():new HungarianAssociator(observationCount,stateCount);
 		
 		// Using https://en.wikipedia.org/wiki/Kalman_filter#Details
 		Data data0 = source.getData0();
