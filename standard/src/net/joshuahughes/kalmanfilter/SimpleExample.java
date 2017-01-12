@@ -21,7 +21,7 @@ public class SimpleExample
 	public static void main(String[] args) throws Exception
 	{
 		int timeCount = 1000;//can be any positive integer
-		int targetCount = 25;//can be any positive integer
+		int targetCount = 36;//can be any positive integer
 		int observationCount = 4;// needs to be 2 or 4
 		int stateCount = 6;//needs to be 4 or 6
 		int obsSwapCount = 10;//can be any non-negative number

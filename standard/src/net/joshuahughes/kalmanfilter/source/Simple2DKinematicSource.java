@@ -94,15 +94,15 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
         		add(data);
         }
     }
-    double defaultProcessNoise = 20d;
-    double defaultObservationNoise = 20d;
+    double defaultProcessNoise = 10d;
+    double defaultObservationNoise = 10d;
     @Override
     public double[][] getPk0k0() {
         return Utility.diagonal(targetCount*stateCount,1);
     }
     @Override
     public double[][] getQk1(double priorTime) {
-        return Utility.diagonal(targetCount*stateCount,defaultProcessNoise*.00000000001);
+        return Utility.diagonal(targetCount*stateCount,defaultProcessNoise*.000000001);
     }
     @Override
     public double[][] getRk(double time) {

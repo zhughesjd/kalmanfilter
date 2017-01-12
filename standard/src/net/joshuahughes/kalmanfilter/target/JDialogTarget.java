@@ -32,7 +32,7 @@ public class JDialogTarget extends JDialog implements Target{
         this.stateCount = stateCount;
         combinedImage = new BufferedImage( xSize,ySize, BufferedImage.TYPE_4BYTE_ABGR);
         lbl = new JLabel(new ImageIcon( combinedImage ) );
-        setSize(combinedImage.getWidth()+50, combinedImage.getHeight()+50);
+        setSize(combinedImage.getWidth()+100, combinedImage.getHeight()+100);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         JPanel contentPane = new JPanel(new BorderLayout());
         contentPane.add(new JScrollPane(lbl),BorderLayout.CENTER);
@@ -81,7 +81,7 @@ public class JDialogTarget extends JDialog implements Target{
             receive(stateEstimates[index][0],stateEstimates[index+1][0],eColors[index%eColors.length],Type.estimates.image.createGraphics( ));
         }
         reset();
-        try {Thread.sleep(100);} catch (InterruptedException e) {e.printStackTrace();}
+        try {Thread.sleep(0);} catch (InterruptedException e) {e.printStackTrace();}
     }
     public void reset()
     {

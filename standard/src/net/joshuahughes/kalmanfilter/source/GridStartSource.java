@@ -15,13 +15,15 @@ public class GridStartSource extends Simple2DKinematicSource
         double y0;
         double xv;
         double yv;
-        public Target( double t0, double x0, double y0, double xv, double yv )
+        double changeTime;
+        public Target( double t0, double x0, double y0, double xv, double yv, double changeTime)
         {
             this.t0 = t0;
             this.x0 = x0;
             this.y0 = y0;
             this.xv = xv;
             this.yv = yv;
+            this.changeTime = changeTime;
         }
         public String toString()
         {
@@ -48,7 +50,7 @@ public class GridStartSource extends Simple2DKinematicSource
                 double y0 = (y+1)*timeCount/(yCount+1);
                 double xv = (.5-rand.nextDouble( ))*4;
                 double yv = (.5-rand.nextDouble( ))*4;
-                list.add( new Target(0, x0, y0, xv, yv ) );
+                list.add( new Target(0, x0, y0, xv, yv, 200 + rand.nextDouble( )*100) );
             }
         }
 
@@ -57,8 +59,9 @@ public class GridStartSource extends Simple2DKinematicSource
     public void compute(ArrayList<ArrayList<Double>> truth, int timeIndex, int targetIndex)
     {
         Target tgt = list.get( targetIndex );
-        double x = tgt.x0 + (timeIndex-tgt.t0)*tgt.xv;
-        double y = tgt.y0 + (timeIndex-tgt.t0)*tgt.yv;
+        double dt = (timeIndex-tgt.t0);
+        double x = tgt.x0 + dt*tgt.xv;
+        double y = tgt.y0 + dt*tgt.yv;
         if(!extents.contains( x, y ))
         {
             double dx = (extents.getCenterX( )- x);
@@ -68,11 +71,20 @@ public class GridStartSource extends Simple2DKinematicSource
             dy/=max;
             tgt.t0 = timeIndex;
             tgt.x0 = x;
-            tgt.xv = (.5-rand.nextDouble( ))*2*dx;
+            tgt.xv = dx;
             tgt.y0 = y;
-            tgt.yv = (.5-rand.nextDouble( ))*2*dy;
-            x = tgt.x0 + (timeIndex-tgt.t0)*tgt.xv;
-            y = tgt.y0 + (timeIndex-tgt.t0)*tgt.yv;
+            tgt.yv = dy;
+            x = tgt.x0 + dt*tgt.xv;
+            y = tgt.y0 + dt*tgt.yv;
+        }
+        if(dt>tgt.changeTime)
+        {
+            tgt.t0 = timeIndex;
+            tgt.x0 = x;
+            tgt.y0 = y;
+            tgt.xv+=rand.nextGaussian( );
+            tgt.yv+=rand.nextGaussian( );
+            
         }
         truth.get(timeIndex).addAll(Arrays.asList(x,y,tgt.xv,tgt.yv));
     }
