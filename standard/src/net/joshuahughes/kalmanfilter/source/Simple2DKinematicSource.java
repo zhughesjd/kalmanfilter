@@ -9,16 +9,18 @@ import java.util.Random;
 
 import net.joshuahughes.kalmanfilter.Utility;
 
-public class Simple2DKinematicSource extends ArrayList<Source.Data> implements Source 
+public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> implements Source 
 {
     private static final long serialVersionUID = 8619045911606133484L;
     double[][] Pk0k0 = null;
     Data data0 = null;
+    int timeCount;
     int targetCount;
     int observationCount;
     int stateCount;
     public Simple2DKinematicSource(int timeCount,int targetCount,int observationCount,int stateCount,int obsSwapCount)
     {
+    	this.timeCount = timeCount;
         this.targetCount = targetCount;
         this.observationCount = observationCount;
         this.stateCount = stateCount;
@@ -27,63 +29,13 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
         ArrayList<ArrayList<Double>> truth = new ArrayList<>();
         for(int index=0;index<timeCount;index++)truth.add(new ArrayList<>());
 
-        for(int index=0;index<timeCount;index++)
+        for(int timeIndex=0;timeIndex<timeCount;timeIndex++)
         {
-            double offset = 0;
-            double arrayPos = index+offset;
-            for(int tIndex=0;tIndex<targetCount;tIndex++)
+            for(int targetIndex=0;targetIndex<targetCount;targetIndex++)
             {
-            	//Increase only y then turn at 45 degrees
-                if(tIndex==0)
-                {
-                    if(index<timeCount/2)
-                        truth.get(index).addAll(Arrays.asList(500d,arrayPos,0d,1d));
-                    else
-                        truth.get(index).addAll(Arrays.asList(arrayPos-offset,arrayPos,1d,1d));
-                }
-            	//Increase only x then turn at 45 degrees
-                if(tIndex==1)
-                {
-                    if(index<timeCount/2)
-                        truth.get(index).addAll(Arrays.asList(arrayPos,500d,1d,0d));
-                    else
-                        truth.get(index).addAll(Arrays.asList(arrayPos,timeCount-arrayPos+offset,1d,-1d));
-                }
-                //Travel a distance then stop
-                if(tIndex==2)
-                {
-                    double stoppingPosit = timeCount/3d;
-                    if(arrayPos<stoppingPosit)
-                        truth.get(index).addAll(Arrays.asList(arrayPos,arrayPos,1d,1d));
-                    else
-                        truth.get(index).addAll(Arrays.asList(stoppingPosit,stoppingPosit,0d,0d));
-                }
-                //Travel in a circular path
-                if(tIndex==3)
-                {
-                	//Here observations are given only if conditions are met
-                	double x = Double.NaN;
-                	double y = Double.NaN;
-                	//Uncomment the next line in order to skip some observations
-                	//if(index<.25d*timeCount || .5d*timeCount<index)
-                	{
-	                    double angle = index*(2d*Math.PI/timeCount);
-	                    double hypot = 200d;
-	                    x = timeCount/2d + hypot*Math.sin(angle);
-	                    y = timeCount/2d + hypot*Math.cos(angle);
-                	}
-                    truth.get(index).addAll(Arrays.asList(x,y,0d,0d));
-                }
-            	//Increase have only y increase
-                if(tIndex>=4)
-                {
-                    int rest = targetCount - 4;
-                    double x = (tIndex-4+1d)*(timeCount/(rest+1d));
-                    double y = tIndex%2 == 1?arrayPos:timeCount - arrayPos;
-                    truth.get(index).addAll(Arrays.asList(x,y,0d,1d));
-                }
-                if(stateCount == 6)
-                    truth.get(index).addAll(Arrays.asList(0d,0d));
+            	compute(truth,timeIndex,targetIndex);
+            	if(stateCount == 6)
+                    truth.get(timeIndex).addAll(Arrays.asList(0d,0d));
             }
         }
         if(observationCount==2)
@@ -175,4 +127,5 @@ public class Simple2DKinematicSource extends ArrayList<Source.Data> implements S
     {
     	return data0;
     }
+    public abstract void compute(ArrayList<ArrayList<Double>> truth, int timeIndex, int targetIndex);
 }

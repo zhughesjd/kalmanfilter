@@ -13,9 +13,9 @@ import java.util.Random;
 import net.joshuahughes.kalmanfilter.associator.Associator;
 import net.joshuahughes.kalmanfilter.associator.HungarianAssociator;
 import net.joshuahughes.kalmanfilter.associator.PassThroughAssociator;
-import net.joshuahughes.kalmanfilter.source.Simple2DKinematicSource;
 import net.joshuahughes.kalmanfilter.source.Source;
 import net.joshuahughes.kalmanfilter.source.Source.Data;
+import net.joshuahughes.kalmanfilter.source.VariousKinematicSource;
 import net.joshuahughes.kalmanfilter.target.JDialogTarget;
 import net.joshuahughes.kalmanfilter.target.Target;
 
@@ -24,17 +24,17 @@ public class SimpleExample
 	static Random rand = new Random(437583478);
 	public static void main(String[] args) throws Exception
 	{
-		int timeCount = 1000;
-
+		int timeCount = 1000;//can be any positive integer
 		int targetCount = 16;//can be any positive integer
 		int observationCount = 4;// needs to be 2 or 4
 		int stateCount = 6;//needs to be 4 or 6
 		int obsSwapCount = 10;
-		Source source = new Simple2DKinematicSource(timeCount,targetCount,observationCount,stateCount,obsSwapCount);
+
+		Source source = new VariousKinematicSource(timeCount,targetCount,observationCount,stateCount,obsSwapCount);
 		Target target = new JDialogTarget(timeCount, timeCount,observationCount,stateCount);
 		Associator associator = obsSwapCount <= 0?new PassThroughAssociator():new HungarianAssociator(observationCount,stateCount);
 		
-		// Using https://en.wikipedia.org/wiki/Kalman_filter#Details
+		// Implementing https://en.wikipedia.org/wiki/Kalman_filter#Details
 		Data data0 = source.getData0();
 		double[][] Pk1k1 = source.getPk0k0();
 		double tk1=data0.time;
