@@ -1,10 +1,7 @@
 package net.joshuahughes.kalmanfilter.source;
 
 import java.awt.geom.Rectangle2D;
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map.Entry;
 
 public class GridStartSource extends Simple2DKinematicSource 
 {

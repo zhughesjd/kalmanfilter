@@ -2,7 +2,6 @@ package net.joshuahughes.kalmanfilter.source;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map.Entry;
 
 public class VariousKinematicSource extends Simple2DKinematicSource 
 {

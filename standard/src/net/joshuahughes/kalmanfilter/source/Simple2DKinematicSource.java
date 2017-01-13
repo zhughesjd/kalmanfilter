@@ -17,7 +17,6 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
 
     double defaultProcessNoise = .01;
     double defaultObservationNoise = 20;
-
     Random rand = new Random(934757384);
     double[][] Pk0k0 = null;
     Data data0 = null;
@@ -78,7 +77,7 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
         for(int tme=0;tme<perturb.length;tme++)
             for(int ste=0;ste<stateCount;ste++)
                 for(int tgt=0;tgt<targetCount;tgt++)
-                    perturb[tme][ste*targetCount+tgt] = truth.get((double)tme).get(ste*targetCount+tgt) + processSigma[ste]*rand.nextGaussian() + obsSigma[ste]*rand.nextGaussian();
+                    perturb[tme][ste*targetCount+tgt] = truth.get((double)tme).get(ste*targetCount+tgt) + obsSigma[ste]*rand.nextGaussian();
         for(int time = 0;time<truth.size();time++)
         {
             for(int index=0;index<obsSwapCount-1;index++)
@@ -100,24 +99,24 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
                             )));
         }
         data0 = this.remove(0);
-        Utility.print( this.get( 0 ).observations);
     }
-    private void insertVelocityAcceleration( TreeMap<Double, ArrayList<Double>> truth )
+	private void insertVelocityAcceleration( TreeMap<Double, ArrayList<Double>> truth )
     {
-        for(Entry<Double, ArrayList<Double>> t2 : truth.entrySet( ))
+        for(Entry<Double, ArrayList<Double>> t1 : truth.entrySet( ))
         {
-            Entry<Double,ArrayList<Double>> t1 = truth.lowerEntry( t2.getKey( ) );
-            if(t1 == null)
-            {
-                t1 = t2;
-                t2 = truth.higherEntry( t1.getKey( ) );
-            }
+        	Entry<Double,ArrayList<Double>> tEntry = t1;
             Entry<Double,ArrayList<Double>> t0 = truth.lowerEntry( t1.getKey( ) );
             if(t0 == null)
             {
                 t0 = t1;
-                t1 = t2;
-                t2 = truth.higherEntry( t1.getKey( ) );
+                t1 = truth.higherEntry( t1.getKey( ) );
+            }
+            Entry<Double,ArrayList<Double>> t2 = truth.higherEntry( t1.getKey( ) );
+            if(t2 == null)
+            {
+                t2 = t1;
+                t1 = t0;
+                t0 = truth.lowerEntry( t1.getKey( ) );
             }
             for(int targetIndex=0;targetIndex<targetCount;targetIndex++)
             {
@@ -129,6 +128,8 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
                     int yi = tIndex+=targetCount;
                     int vxi = tIndex+=targetCount;
                     int vyi = tIndex+=targetCount;
+                    int axi = tIndex+=targetCount;
+                    int ayi = tIndex+=targetCount;
 
                     double x0 = t0.getValue().get( xi );
                     double x1 = t1.getValue().get( xi );
@@ -137,14 +138,10 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
                     double y1 = t1.getValue().get( yi );
                     double y2 = t2.getValue().get( yi );
                     
-                    double vx = (x2-x1)/dt;
-                    double vy = (y2-y1)/dt;
-                    
-                    System.out.println(vx - t1.getValue( ).get( vxi ));
-                    System.out.println(vy - t1.getValue( ).get( vyi ));
-
-                    double ax = (x0 -2*x1 + x2)/(dt*dt);
-                    double ay = (y0 -2*y1 + y2)/(dt*dt);
+                    tEntry.getValue().set(vxi,((x2-x1)+(x1-x0))/(2*dt));
+                    tEntry.getValue().set(vyi,((y2-y1)+(y1-y0))/(2*dt));
+                    tEntry.getValue().set(axi,(x0 -2*x1 + x2)/(dt*dt));
+                    tEntry.getValue().set(ayi,(y0 -2*y1 + y2)/(dt*dt));
                 }
             }
         }
@@ -155,7 +152,9 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
     }
     @Override
     public double[][] getQk1(double priorTime) {
-        return Utility.diagonal(targetCount*stateCount,defaultProcessNoise);
+    	double[][] Qk1 = Utility.diagonal(targetCount*stateCount,defaultProcessNoise);
+    	
+    	return Qk1;
     }
     @Override
     public double[][] getRk(double time) {
