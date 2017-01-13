@@ -7,6 +7,7 @@ import static net.joshuahughes.kalmanfilter.Utility.product;
 import static net.joshuahughes.kalmanfilter.Utility.replace;
 import static net.joshuahughes.kalmanfilter.Utility.sum;
 import static net.joshuahughes.kalmanfilter.Utility.transpose;
+
 import net.joshuahughes.kalmanfilter.associator.Associator;
 import net.joshuahughes.kalmanfilter.associator.HungarianAssociator;
 import net.joshuahughes.kalmanfilter.associator.PassThroughAssociator;
@@ -21,8 +22,8 @@ public class SimpleExample
 	public static void main(String[] args) throws Exception
 	{
 		int timeCount = 1000;//can be any positive integer
-		int targetCount = 36;//can be any positive integer
-		int observationCount = 4;// needs to be 2 or 4
+		int targetCount = 3;//can be any positive integer
+		int observationCount = 2;// needs to be 2 or 4
 		int stateCount = 6;//needs to be 4 or 6
 		int obsSwapCount = 10;//can be any non-negative number
 
@@ -35,7 +36,8 @@ public class SimpleExample
 		Data data0 = source.getData0();
 		double[][] Pk1k1 = source.getPk0k0();
 		double tk1=data0.time;
-		double[][] xk1k1 = data0.observations;
+		double[][] xk1k1 = new double[stateCount*targetCount][1];
+		for(int i=0;i<data0.observations.length;i++)xk1k1[i][0]=data0.observations[i][0];
 		target.receive(data0);
 		for(Data data : source)
 		{

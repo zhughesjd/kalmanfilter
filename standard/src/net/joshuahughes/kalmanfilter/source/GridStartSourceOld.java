@@ -2,8 +2,9 @@ package net.joshuahughes.kalmanfilter.source;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 
-public class GridStartSource extends Simple2DKinematicSource 
+public class GridStartSourceOld extends Simple2DKinematicSourceOld 
 {
     private static final long serialVersionUID = -5593617619623755656L;
 
@@ -31,7 +32,7 @@ public class GridStartSource extends Simple2DKinematicSource
     }
     ArrayList<Target> list = new ArrayList<>();
     Rectangle2D.Double extents; 
-    public GridStartSource(int timeCount, int targetCount, int observationCount, int stateCount, int obsSwapCount)
+    public GridStartSourceOld(int timeCount, int targetCount, int observationCount, int stateCount, int obsSwapCount)
     {
         super(timeCount, targetCount, observationCount, stateCount, obsSwapCount);
         extents = new Rectangle2D.Double( 0, 0, timeCount, timeCount );
@@ -85,8 +86,6 @@ public class GridStartSource extends Simple2DKinematicSource
             tgt.yv+=rand.nextGaussian( );
             
         }
-        double[] states = {x,y,tgt.xv,tgt.yv,0d,0d};
-        for(int sIndex=0,tIndex=targetIndex;sIndex<states.length;sIndex++,tIndex+=targetIndex)
-        	truth.get(timeIndex).set(tIndex,states[sIndex]);
+        truth.get(timeIndex).addAll(Arrays.asList(x,y,tgt.xv,tgt.yv));
     }
 }

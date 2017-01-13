@@ -152,8 +152,8 @@ public class Utility {
         for(String s : strings)
             System.out.print(s);
         System.out.println(" - dim: "+matrix.length+" x "+matrix[0].length);
-//        for(double[] array : matrix)
-//            System.out.println(Arrays.toString( array ));
+        for(double[] array : matrix)
+            System.out.println(Arrays.toString( array ));
     }
 	public static double[][] diagonal(double... values) {
 		double[][] diagonal = new double[values.length][values.length];
