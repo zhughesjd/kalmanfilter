@@ -2,6 +2,7 @@ package net.joshuahughes.kalmanfilter.source;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map.Entry;
 
 public class VariousKinematicSource extends Simple2DKinematicSource 
 {
@@ -65,4 +66,11 @@ public class VariousKinematicSource extends Simple2DKinematicSource
 			truth.get(timeIndex).addAll(Arrays.asList(x,y,0d,1d));
 		}
 	}
+
+    @Override
+    public double[] compute( int timeIndex, int targetIndex )
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

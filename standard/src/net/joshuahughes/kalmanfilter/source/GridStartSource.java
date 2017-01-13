@@ -1,12 +1,14 @@
 package net.joshuahughes.kalmanfilter.source;
 
 import java.awt.geom.Rectangle2D;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map.Entry;
 
 public class GridStartSource extends Simple2DKinematicSource 
 {
     private static final long serialVersionUID = -5593617619623755656L;
-
     public class Target
     {
         double t0;
@@ -52,10 +54,9 @@ public class GridStartSource extends Simple2DKinematicSource
                 list.add( new Target(0, x0, y0, xv, yv, 200 + rand.nextDouble( )*100) );
             }
         }
-
     }
     
-    public void compute(ArrayList<ArrayList<Double>> truth, int timeIndex, int targetIndex)
+    public double[] compute(int timeIndex, int targetIndex)
     {
         Target tgt = list.get( targetIndex );
         double dt = (timeIndex-tgt.t0);
@@ -63,18 +64,14 @@ public class GridStartSource extends Simple2DKinematicSource
         double y = tgt.y0 + dt*tgt.yv;
         if(!extents.contains( x, y ))
         {
+            tgt.x0 = x;
+            tgt.y0 = y;
             double dx = (extents.getCenterX( )- x);
             double dy = (extents.getCenterY( )- y);
             double max = Math.max( Math.abs( dx ), Math.abs( dy ) );
-            dx/=max;
-            dy/=max;
+            tgt.xv = dx/max/dt;
+            tgt.yv = dy/max/dt;
             tgt.t0 = timeIndex;
-            tgt.x0 = x;
-            tgt.xv = dx;
-            tgt.y0 = y;
-            tgt.yv = dy;
-            x = tgt.x0 + dt*tgt.xv;
-            y = tgt.y0 + dt*tgt.yv;
         }
         if(dt>tgt.changeTime)
         {
@@ -85,8 +82,6 @@ public class GridStartSource extends Simple2DKinematicSource
             tgt.yv+=rand.nextGaussian( );
             
         }
-        double[] states = {x,y,tgt.xv,tgt.yv,0d,0d};
-        for(int sIndex=0,tIndex=targetIndex;sIndex<states.length;sIndex++,tIndex+=targetIndex)
-        	truth.get(timeIndex).set(tIndex,states[sIndex]);
+        return new double[]{x,y,tgt.xv,tgt.yv,0d,0d};
     }
 }

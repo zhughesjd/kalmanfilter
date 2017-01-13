@@ -26,8 +26,10 @@ public class JDialogTarget extends JDialog implements Target{
     int stateCount;
     boolean grayMeasurement = true;
     BufferedImage combinedImage;
-    public JDialogTarget(int xSize,int ySize,int observationCount,int stateCount)
+    private int targetCount;
+    public JDialogTarget(int xSize,int ySize,int observationCount,int stateCount,int targetCount)
     {
+        this.targetCount = targetCount;
         this.observationCount = observationCount;
         this.stateCount = stateCount;
         combinedImage = new BufferedImage( xSize,ySize, BufferedImage.TYPE_4BYTE_ABGR);
@@ -61,25 +63,23 @@ public class JDialogTarget extends JDialog implements Target{
     public void receive(Data data) {
         if(data.truth!=null)
         {
-            for(int index=0;index<data.truth.length;index+=stateCount)
-                receive(data.truth[index][0],data.truth[index+1][0],Color.white,Type.truth.image.createGraphics( ));
+            for(int index=0;index<targetCount;index++)
+                receive(data.truth[index][0],data.truth[index+targetCount][0],Color.white,Type.truth.image.createGraphics( ));
         }
         Graphics2D g2d = Type.recent_obs.image.createGraphics( );
         g2d.setColor( new Color(0,0,0,0) );
         g2d.clearRect( 0, 0, Type.recent_obs.image.getWidth( ), Type.recent_obs.image.getHeight( ) );
-        for(int index=0;index<data.observations.length;index+=stateCount)
+        for(int index=0;index<targetCount;index++)
         {
-            receive(data.observations[index][0],data.observations[index+1][0],mColors[index%mColors.length],Type.all_obs.image.createGraphics( ));
-            receive(data.observations[index][0],data.observations[index+1][0],mColors[index%mColors.length],Type.recent_obs.image.createGraphics( ));
+            receive(data.observations[index][0],data.observations[index+targetCount][0],mColors[index%mColors.length],Type.all_obs.image.createGraphics( ));
+            receive(data.observations[index][0],data.observations[index+targetCount][0],mColors[index%mColors.length],Type.recent_obs.image.createGraphics( ));
         }
         reset();
     }
     @Override
     public void receive(double[][] stateEstimates, double[][] estimateCovariance) {
-        for(int index=0;index<stateEstimates.length;index+=stateCount)
-        {
-            receive(stateEstimates[index][0],stateEstimates[index+1][0],eColors[index%eColors.length],Type.estimates.image.createGraphics( ));
-        }
+        for(int index=0;index<targetCount;index++)
+            receive(stateEstimates[index][0],stateEstimates[index+targetCount][0],eColors[index%eColors.length],Type.estimates.image.createGraphics( ));
         reset();
         try {Thread.sleep(0);} catch (InterruptedException e) {e.printStackTrace();}
     }
