@@ -111,12 +111,46 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
 			this.RMap.put((double)y, R);
 
 		//Create Q
-		int spread = 3;
-		for(int x=0;x<truth.length;x+=spread)
+		int spread = 5;
+		int offset = spread/2;
+		for(int x=0;x<truth.length;x++)
 		{
+			int xs = x-offset;
+			int xf = x+offset;
+			if(xs<0)
+			{
+				xs = 0;
+				xf = spread-1;
+			}
+			if(xf>=truth.length)
+			{
+				xs = truth.length-spread;
+				xf = truth.length-1;
+			}
+			double[][] sub = new double[spread][];
+			for(int s=0,o=xs;o<=xf;s++,o++)	sub[s] = truth[o];
+			QkMap.put((double)x,variance(sub));
 		}
 	}
 	
+	private double[][] variance(double[][] observed) {
+		double[][] sum = new double[1][observed[0].length];
+		for(int y=0;y<observed.length;y++)
+			sum = Utility.sum(sum, new double[][]{observed[y]});
+		double[][] mean = Utility.product(sum,1d/observed.length);
+		sum = new double[1][observed[0].length];
+		for(int y=0;y<observed.length;y++)
+		{
+			double[][] diff = Utility.difference(mean,new double[][]{observed[y]});
+			double[][] sqrd = Utility.elementalProduct(diff,diff);
+			sum = Utility.sum(sum,sqrd);
+		}
+		double[] allVariance = Utility.product(sum,1d/(observed.length-1))[0];
+		double[][] variance = new double[allVariance.length][allVariance.length];
+		for(int i=targetCount*2;i<targetCount*4;i++)
+			variance[i][i] = allVariance[i];
+		return variance ;
+	}
 	private void insertVelocityAcceleration( TreeMap<Double, ArrayList<Double>> truth )
     {
         for(Entry<Double, ArrayList<Double>> t1 : truth.entrySet( ))
@@ -168,15 +202,12 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
         return Utility.diagonal(targetCount*stateCount,1);
     }
     @Override
-    public double[][] getQk1(double priorTime) {
-    	double[][] Qk1 = Utility.diagonal(targetCount*stateCount,defaultProcessNoise);
-    	
-    	return Qk1;
+    public double[][] getQk1(double time) {
+    	return QkMap.get(time);
     }
     @Override
     public double[][] getRk(double time) {
     	return RMap.get(time);
-//        return Utility.diagonal(observationCount*targetCount,defaultObservationNoise);
     }
     @Override
     public double[][] getFk(double dt) {

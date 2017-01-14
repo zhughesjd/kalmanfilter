@@ -34,7 +34,7 @@ public class JDialogTarget extends JDialog implements Target{
         this.stateCount = stateCount;
         combinedImage = new BufferedImage( xSize,ySize, BufferedImage.TYPE_4BYTE_ABGR);
         lbl = new JLabel(new ImageIcon( combinedImage ) );
-        setSize(combinedImage.getWidth()+100, combinedImage.getHeight()+100);
+        setSize(combinedImage.getWidth()+110, combinedImage.getHeight()+100);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         JPanel contentPane = new JPanel(new BorderLayout());
         contentPane.add(new JScrollPane(lbl),BorderLayout.CENTER);

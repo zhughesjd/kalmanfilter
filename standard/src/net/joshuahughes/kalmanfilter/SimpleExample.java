@@ -22,7 +22,7 @@ public class SimpleExample
 	{
 		int timeCount = 1000;//can be any positive integer
 		int targetCount = 4;//can be any positive integer
-		int observationCount = 4;// needs to be 2 or 4
+		int observationCount = 2;// needs to be 2 or 4
 		int stateCount = 6;//needs to be 4 or 6
 		int obsSwapCount = 0;//can be any non-negative number
 
