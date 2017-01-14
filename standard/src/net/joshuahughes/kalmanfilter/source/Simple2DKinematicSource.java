@@ -70,7 +70,7 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
                     truthMatrix[tme][ste*targetCount+tgt] = truth.get((double)tme).get(ste*targetCount+tgt);
                     perturb[tme][ste*targetCount+tgt] = truthMatrix[tme][ste*targetCount+tgt] + obsSigma[ste]*rand.nextGaussian();
                 }
-        createQR(truthMatrix,perturb);
+        calculateQR(truthMatrix,perturb);
         for(int time = 0;time<truth.size();time++)
         {
             for(int index=0;index<obsSwapCount-1;index++)
@@ -93,16 +93,8 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
         }
         data0 = this.remove(0);
     }
-	private void createQR(double[][] truth, double[][] observed) {
-		//Create R
-		double[][] magnitude = Utility.abs(Utility.difference(observed, truth));
-		for(int i=0;i<magnitude.length;i++)
-			magnitude[i] = Arrays.copyOfRange(magnitude[i],0,observationCount*targetCount);
-		double[][] Rk = Utility.diagonal(variance(magnitude)[0]);
-		for(int y=0;y<observed.length;y++)
-			this.RMap.put((double)y, Rk);
-
-		//Create Q
+	private void calculateQR(double[][] truth, double[][] observed) {
+		//Calculate Q
 		int spread = 5;
 		int offset = spread/2;
 		for(int x=0;x<truth.length;x++)
@@ -127,6 +119,13 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
 				Qk[i][i] = allVariance[i];
 			QkMap.put((double)x,Qk);
 		}
+		//Calculate R
+		double[][] magnitude = Utility.abs(Utility.difference(observed, truth));
+		for(int i=0;i<magnitude.length;i++)
+			magnitude[i] = Arrays.copyOfRange(magnitude[i],0,observationCount*targetCount);
+		double[][] Rk = Utility.diagonal(variance(magnitude)[0]);
+		for(int y=0;y<observed.length;y++)
+			this.RMap.put((double)y, Rk);
 	}
 	
 	private double[][] variance(double[][] observed) {
@@ -206,10 +205,10 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
         //Position model entries
         double[][] Fk = Utility.identity( stateCount*targetCount );
         //Velocity model entries
-        int c = stateCount*targetCount/3;
+        int c = 2*targetCount;
         for(int r=0;c<Fk[0].length;r++) Fk[r][c++] = dt;
         //Acceleration model entries
-        c = 2*stateCount*targetCount/3;
+        c = 4*targetCount;
         for(int r=0;c<Fk[0].length;r++) Fk[r][c++] = .5*dt*dt;
         return Fk;
     }

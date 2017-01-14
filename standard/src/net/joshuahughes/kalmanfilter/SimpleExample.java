@@ -23,7 +23,7 @@ public class SimpleExample
 	{
 		int timeCount = 1000;//can be any positive integer
 		int targetCount = 4;//can be any positive integer
-		int observationCount = 2;// needs to be 2 or 4
+		int observationCount = 4;// needs to be 2 or 4
 		int stateCount = 6;//needs to be 4 or 6
 		int obsSwapCount = 0;//can be any non-negative number
 		double defaultQk = Double.NaN;//not used yet
@@ -63,7 +63,6 @@ public class SimpleExample
 			
 			// Update
 			double[][] yk = difference(zk,product(Hk,xkk1));
-			
 			double[][] Sk = sum(product(Hk,product(Pkk1,HkT)),Rk);
 			double[][] Kk = product(Pkk1,product(HkT,inverse(Sk)));
 			double[][] xkk = sum(xkk1,product(Kk,yk));
