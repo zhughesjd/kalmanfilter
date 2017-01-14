@@ -72,72 +72,6 @@ public class Utility {
         }
         return product;
     }
-    public static double[][] getRk( int dim1, int dim2 )
-    {
-        int iDim = dim1*dim2;
-        double[][] identity = new double[iDim][iDim];
-        for(int index=0;index<iDim;index++)
-            identity[index][index] = .01*rand.nextDouble();
-        return identity;
-    }
-    
-    public static double[][] getH( int dim1, int dim2 )
-    {
-        int hDim = dim1*dim2;
-        double[][] H = new double[hDim][hDim];
-        for(int index=0;index<hDim;index++)
-            H[index][index] = 1;
-        return H;
-    }
-    public static double[][] getzk( int tgtCnt, int stateCount, double[][] data )
-    {
-        int dim = stateCount*tgtCnt;
-        double[][] zk = new double[dim][1];
-        //skip over
-        int xIndex = 0;
-        int index = 0;
-        while(xIndex+stateCount<zk.length && index+stateCount<data[0].length)
-        {
-            for(int i=0;i<stateCount;i++)
-            {
-                zk[xIndex++][0] = data[0][i+index];
-            }
-            index+=2*stateCount;
-        }
-        return zk;
-    }
-    public static double[][] getPk1k1( int tgtCnt, int stateCount, double[][] zk )
-    {
-        int dim = stateCount*tgtCnt;
-        double[][] xk1k1 = new double[1][dim];
-        //skip over
-        int xIndex = 0;
-        int startIndex=0;
-        int index = startIndex;
-        while(xIndex+stateCount<xk1k1[0].length && index+stateCount<zk.length)
-        {
-            for(int i=0;i<stateCount;i++)
-            {
-                xk1k1[0][xIndex++] = zk[0][i+stateCount+index];
-            }
-            index+=2*stateCount;
-        }
-        return xk1k1;
-    }
-    public static double[][] getFk( int tgtCnt,int stateCount, double dt )
-    {
-        int dim = stateCount*tgtCnt;
-        double[][] Fk = new double[dim][dim];
-        for(int i=0;i<dim;i++)
-        {
-            Fk[i][i] = 1;
-            if(i<dim-2 && i%4<2)
-            {
-                Fk[i][i+2] = dt;
-            }
-        }
-        return Fk;
-    }
     public static double[][] transpose( double[][] matrix )
     {
         double[][] transpose = new double[matrix[0].length][matrix.length];
@@ -173,5 +107,29 @@ public class Utility {
 		double[] s0 = Arrays.copyOfRange(vector, sv0, sv0+svLength);
 		double[] s1 = Arrays.copyOfRange(vector, sv1, sv1+svLength);
 		for(int index=0;index<svLength;vector[sv1+index] = s0[index],vector[sv0+index] = s1[index],index++);
+	}
+	public static double[][] product(double m1, double[][] m2) {
+		return product(m2,m1);
+	}
+	public static double[][] product(double[][] m1, double m2) {
+		double[][] product = new double[m1.length][m1[0].length];
+        for(int x=0;x<product.length;x++)
+            for(int y=0;y<product[0].length;y++)
+            	product[x][y] = m1[x][y]*m2;
+		return product;
+	}
+	public static double[][] elementalProduct(double[][] m1, double[][] m2) {
+		double[][] product = new double[m1.length][m1[0].length];
+        for(int x=0;x<product.length;x++)
+            for(int y=0;y<product[0].length;y++)
+            	product[x][y] = m1[x][y]*m2[x][y];
+		return product;
+	}
+	public static double[][] abs(double[][] matrix) {
+		double[][] abs = new double[matrix.length][matrix[0].length];
+        for(int x=0;x<abs.length;x++)
+            for(int y=0;y<abs[0].length;y++)
+            	abs[x][y] = Math.abs(matrix[x][y]);
+		return abs;
 	}
 }

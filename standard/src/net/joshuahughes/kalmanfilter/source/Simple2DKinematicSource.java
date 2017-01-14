@@ -14,7 +14,8 @@ import net.joshuahughes.kalmanfilter.Utility;
 public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> implements Source 
 {
     private static final long serialVersionUID = 8619045911606133484L;
-
+    TreeMap<Double,double[][]> RMap = new TreeMap<>();
+    TreeMap<Double,double[][]> QkMap = new TreeMap<>();
     double defaultProcessNoise = .01;
     double defaultObservationNoise = 20;
     Random rand = new Random(934757384);
@@ -55,29 +56,20 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
             }
         insertVelocityAcceleration(truth);
 
-        double pxx = defaultProcessNoise;
-        double pxy = pxx;
-        double pvx = 0;
-        double pvy = 0;
-        double pax = 0;
-        double pay = 0;
-        double[] processSigma = new double[]{pxx,pxy,pvx,pvy,pax,pay};
-        processSigma = Arrays.copyOf( processSigma,stateCount );
-
         double oxx = defaultObservationNoise;
         double oxy = oxx;
-        double ovx = 0;
-        double ovy = 0;
-        double oax = 0;
-        double oay = 0;
-        double[] obsSigma = new double[]{oxx,oxy,ovx,ovy,oax,oay};
+        double[] obsSigma = new double[]{oxx,oxy,0,0,0,0};
         obsSigma = Arrays.copyOf( obsSigma,stateCount );
 
+        double[][] truthMatrix = new double[timeCount][stateCount*targetCount];
         double[][] perturb = new double[timeCount][stateCount*targetCount];
         for(int tme=0;tme<perturb.length;tme++)
             for(int ste=0;ste<stateCount;ste++)
-                for(int tgt=0;tgt<targetCount;tgt++)
-                    perturb[tme][ste*targetCount+tgt] = truth.get((double)tme).get(ste*targetCount+tgt) + obsSigma[ste]*rand.nextGaussian();
+                for(int tgt=0;tgt<targetCount;tgt++){
+                    truthMatrix[tme][ste*targetCount+tgt] = truth.get((double)tme).get(ste*targetCount+tgt);
+                    perturb[tme][ste*targetCount+tgt] = truthMatrix[tme][ste*targetCount+tgt] + obsSigma[ste]*rand.nextGaussian();
+                }
+        createQR(truthMatrix,perturb);
         for(int time = 0;time<truth.size();time++)
         {
             for(int index=0;index<obsSwapCount-1;index++)
@@ -100,6 +92,31 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
         }
         data0 = this.remove(0);
     }
+	private void createQR(double[][] truth, double[][] observed) {
+		//Create R
+		double[][] sum = new double[1][observed[0].length];
+		for(int y=0;y<observed.length;y++)
+			sum = Utility.sum(sum, Utility.abs(Utility.difference(new double[][]{truth[y]},new double[][]{observed[y]})));
+		double[][] mean = Utility.product(sum,1d/observed.length);
+		sum = new double[1][observed[0].length];
+		for(int y=0;y<observed.length;y++)
+		{
+			double[][] diff = Utility.difference(mean,Utility.abs(Utility.difference(new double[][]{truth[y]},new double[][]{observed[y]})));
+			double[][] sqrd = Utility.elementalProduct(diff,diff);
+			sum = Utility.sum(sum,sqrd);
+		}
+		double[][] variance = Utility.product(sum,1d/(observed.length-1));
+		double[][] R = Utility.diagonal(variance[0]);
+		for(int y=0;y<observed.length;y++)
+			this.RMap.put((double)y, R);
+
+		//Create Q
+		int spread = 3;
+		for(int x=0;x<truth.length;x+=spread)
+		{
+		}
+	}
+	
 	private void insertVelocityAcceleration( TreeMap<Double, ArrayList<Double>> truth )
     {
         for(Entry<Double, ArrayList<Double>> t1 : truth.entrySet( ))
@@ -158,7 +175,8 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
     }
     @Override
     public double[][] getRk(double time) {
-        return Utility.diagonal(observationCount*targetCount,defaultObservationNoise);
+    	return RMap.get(time);
+//        return Utility.diagonal(observationCount*targetCount,defaultObservationNoise);
     }
     @Override
     public double[][] getFk(double dt) {
