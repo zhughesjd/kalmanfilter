@@ -11,9 +11,9 @@ import static net.joshuahughes.kalmanfilter.Utility.transpose;
 import net.joshuahughes.kalmanfilter.associator.Associator;
 import net.joshuahughes.kalmanfilter.associator.HungarianAssociator;
 import net.joshuahughes.kalmanfilter.associator.PassThroughAssociator;
-import net.joshuahughes.kalmanfilter.source.GridStartSource;
 import net.joshuahughes.kalmanfilter.source.Source;
 import net.joshuahughes.kalmanfilter.source.Source.Data;
+import net.joshuahughes.kalmanfilter.source.VariousKinematicSource;
 import net.joshuahughes.kalmanfilter.target.JDialogTarget;
 import net.joshuahughes.kalmanfilter.target.Target;
 
@@ -22,14 +22,14 @@ public class SimpleExample
 	public static void main(String[] args) throws Exception
 	{
 		int timeCount = 1000;//can be any positive integer
-		int targetCount = 4;//can be any positive integer
+		int targetCount = 25;//can be any positive integer
 		int observationCount = 4;// needs to be 2 or 4
 		int stateCount = 6;//needs to be 4 or 6
 		int obsSwapCount = 0;//can be any non-negative number
 		double defaultQk = Double.NaN;//not used yet
 		double defaultRk = 20;//now being used
 
-		Source source = new GridStartSource(timeCount,targetCount,observationCount,stateCount,obsSwapCount,defaultQk,defaultRk);
+		Source source = new VariousKinematicSource(timeCount,targetCount,observationCount,stateCount,obsSwapCount,defaultQk,defaultRk);
 		source.compute();
 		Target target = new JDialogTarget(timeCount, timeCount,observationCount,stateCount,targetCount);
 		Associator associator = obsSwapCount <= 0?new PassThroughAssociator():new HungarianAssociator(observationCount,stateCount);
