@@ -30,9 +30,9 @@ public class GridStartSource extends Simple2DKinematicSource
     }
     ArrayList<Target> list = new ArrayList<>();
     Rectangle2D.Double extents; 
-    public GridStartSource(int timeCount, int targetCount, int observationCount, int stateCount, int obsSwapCount)
+    public GridStartSource(int timeCount, int targetCount, int observationCount, int stateCount, int obsSwapCount,double defaultQk,double defaultRk)
     {
-        super(timeCount, targetCount, observationCount, stateCount, obsSwapCount);
+        super(timeCount, targetCount, observationCount, stateCount, obsSwapCount,defaultQk, defaultRk);
         extents = new Rectangle2D.Double( 0, 0, timeCount, timeCount );
         double sqrt = Math.sqrt( targetCount );
         int floor = ( int ) Math.floor( sqrt );

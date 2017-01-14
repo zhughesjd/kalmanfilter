@@ -16,8 +16,6 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
     private static final long serialVersionUID = 8619045911606133484L;
     TreeMap<Double,double[][]> RMap = new TreeMap<>();
     TreeMap<Double,double[][]> QkMap = new TreeMap<>();
-    double defaultProcessNoise = .01;
-    double defaultObservationNoise = 20;
     Random rand = new Random(934757384);
     double[][] Pk0k0 = null;
     Data data0 = null;
@@ -26,8 +24,11 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
     int observationCount;
     int stateCount;
     int obsSwapCount;
-    public Simple2DKinematicSource(int timeCount,int targetCount,int observationCount,int stateCount,int obsSwapCount)
+	double defaultQk;
+	double defaultRk;
+    public Simple2DKinematicSource(int timeCount,int targetCount,int observationCount,int stateCount,int obsSwapCount,double defaultQk,double defaultRk)
     {
+    	this.defaultRk = defaultRk;
         this.timeCount = timeCount;
         this.targetCount = targetCount;
         this.observationCount = observationCount;
@@ -56,7 +57,7 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
             }
         insertVelocityAcceleration(truth);
 
-        double oxx = defaultObservationNoise;
+        double oxx = defaultRk;
         double oxy = oxx;
         double[] obsSigma = new double[]{oxx,oxy,0,0,0,0};
         obsSigma = Arrays.copyOf( obsSigma,stateCount );
@@ -94,11 +95,11 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
     }
 	private void createQR(double[][] truth, double[][] observed) {
 		//Create R
-		double[][] sum = new double[1][observed[0].length];
+		double[][] sum = new double[1][observationCount*targetCount];
 		for(int y=0;y<observed.length;y++)
 			sum = Utility.sum(sum, Utility.abs(Utility.difference(new double[][]{truth[y]},new double[][]{observed[y]})));
 		double[][] mean = Utility.product(sum,1d/observed.length);
-		sum = new double[1][observed[0].length];
+		sum = new double[1][sum[0].length];
 		for(int y=0;y<observed.length;y++)
 		{
 			double[][] diff = Utility.difference(mean,Utility.abs(Utility.difference(new double[][]{truth[y]},new double[][]{observed[y]})));
@@ -107,6 +108,8 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
 		}
 		double[][] variance = Utility.product(sum,1d/(observed.length-1));
 		double[][] R = Utility.diagonal(variance[0]);
+
+		
 		for(int y=0;y<observed.length;y++)
 			this.RMap.put((double)y, R);
 

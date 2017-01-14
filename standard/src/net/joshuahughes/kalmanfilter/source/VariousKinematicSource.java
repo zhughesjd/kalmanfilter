@@ -7,9 +7,9 @@ public class VariousKinematicSource extends Simple2DKinematicSource
 {
 	private static final long serialVersionUID = -5593617619623755656L;
 
-	public VariousKinematicSource(int timeCount, int targetCount, int observationCount, int stateCount, int obsSwapCount)
+	public VariousKinematicSource(int timeCount, int targetCount, int observationCount, int stateCount, int obsSwapCount, double defaultQk, double defaultRk)
 	{
-		super(timeCount, targetCount, observationCount, stateCount, obsSwapCount);
+		super(timeCount, targetCount, observationCount, stateCount, obsSwapCount, defaultQk, defaultRk);
 	}
 
 	public void compute(ArrayList<ArrayList<Double>> truth, int timeIndex, int targetIndex)

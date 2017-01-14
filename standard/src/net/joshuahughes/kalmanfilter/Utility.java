@@ -5,6 +5,7 @@ import java.util.Random;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.LUDecomposition;
+import org.apache.commons.math3.linear.SingularMatrixException;
 
 public class Utility {
 	public static Random rand = new Random(9832927l);
@@ -31,7 +32,13 @@ public class Utility {
     }
     public static double[][] inverse( double[][] matrix )
     {
-        return new LUDecomposition( new Array2DRowRealMatrix( matrix ) ).getSolver( ).getInverse( ).getData( );
+    	try{
+    		return new LUDecomposition( new Array2DRowRealMatrix( matrix ) ).getSolver( ).getInverse( ).getData( );
+    	}catch(SingularMatrixException e){
+    		// Could be diagonal is effectively zero
+    		// Try flooring it
+    		return new LUDecomposition( new Array2DRowRealMatrix( diagonalMax(matrix,.0000001) ) ).getSolver( ).getInverse( ).getData( );
+    	}
     }
     public static double[][] diagonal(int dim,double value)
     {
@@ -46,7 +53,7 @@ public class Utility {
     }
     public static double[][] difference( double[][] s0, double[][] s1 )
     {
-        double[][] difference = new double[s0.length][s0[0].length];
+        double[][] difference = create(s0);
         for(int x=0;x<difference.length;x++)
             for(int y=0;y<difference[0].length;y++)
                 difference[x][y] = s0[x][y] - s1[x][y];
@@ -112,24 +119,35 @@ public class Utility {
 		return product(m2,m1);
 	}
 	public static double[][] product(double[][] m1, double m2) {
-		double[][] product = new double[m1.length][m1[0].length];
+		double[][] product = create(m1);
         for(int x=0;x<product.length;x++)
             for(int y=0;y<product[0].length;y++)
             	product[x][y] = m1[x][y]*m2;
 		return product;
 	}
 	public static double[][] elementalProduct(double[][] m1, double[][] m2) {
-		double[][] product = new double[m1.length][m1[0].length];
+		double[][] product = create(m1);
         for(int x=0;x<product.length;x++)
             for(int y=0;y<product[0].length;y++)
             	product[x][y] = m1[x][y]*m2[x][y];
 		return product;
 	}
 	public static double[][] abs(double[][] matrix) {
-		double[][] abs = new double[matrix.length][matrix[0].length];
+		double[][] abs = create(matrix);
         for(int x=0;x<abs.length;x++)
             for(int y=0;y<abs[0].length;y++)
             	abs[x][y] = Math.abs(matrix[x][y]);
 		return abs;
+	}
+	public static double[][] diagonalMax(double[][] matrix, double value) {
+		double[][] max = create(matrix);
+        for(int x=0;x<matrix.length;x++)
+            for(int y=0;y<matrix[0].length;y++)
+            	max[x][y] = x==y?Math.max(matrix[x][y],value):matrix[x][y];
+		return max;
+	}
+	public static double[][] create(double[][] matrix)
+	{
+		return new double[matrix.length][matrix[0].length];
 	}
 }

@@ -7,6 +7,7 @@ import static net.joshuahughes.kalmanfilter.Utility.product;
 import static net.joshuahughes.kalmanfilter.Utility.replace;
 import static net.joshuahughes.kalmanfilter.Utility.sum;
 import static net.joshuahughes.kalmanfilter.Utility.transpose;
+
 import net.joshuahughes.kalmanfilter.associator.Associator;
 import net.joshuahughes.kalmanfilter.associator.HungarianAssociator;
 import net.joshuahughes.kalmanfilter.associator.PassThroughAssociator;
@@ -25,8 +26,10 @@ public class SimpleExample
 		int observationCount = 2;// needs to be 2 or 4
 		int stateCount = 6;//needs to be 4 or 6
 		int obsSwapCount = 0;//can be any non-negative number
+		double defaultQk = Double.NaN;//not used yet
+		double defaultRk = 20;//now being used
 
-		Source source = new GridStartSource(timeCount,targetCount,observationCount,stateCount,obsSwapCount);
+		Source source = new GridStartSource(timeCount,targetCount,observationCount,stateCount,obsSwapCount,defaultQk,defaultRk);
 		source.compute();
 		Target target = new JDialogTarget(timeCount, timeCount,observationCount,stateCount,targetCount);
 		Associator associator = obsSwapCount <= 0?new PassThroughAssociator():new HungarianAssociator(observationCount,stateCount);
@@ -60,6 +63,7 @@ public class SimpleExample
 			
 			// Update
 			double[][] yk = difference(zk,product(Hk,xkk1));
+			
 			double[][] Sk = sum(product(Hk,product(Pkk1,HkT)),Rk);
 			double[][] Kk = product(Pkk1,product(HkT,inverse(Sk)));
 			double[][] xkk = sum(xkk1,product(Kk,yk));
