@@ -95,23 +95,12 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
     }
 	private void createQR(double[][] truth, double[][] observed) {
 		//Create R
-		double[][] sum = new double[1][observationCount*targetCount];
+		double[][] magnitude = Utility.abs(Utility.difference(observed, truth));
+		for(int i=0;i<magnitude.length;i++)
+			magnitude[i] = Arrays.copyOfRange(magnitude[i],0,observationCount*targetCount);
+		double[][] Rk = Utility.diagonal(variance(magnitude)[0]);
 		for(int y=0;y<observed.length;y++)
-			sum = Utility.sum(sum, Utility.abs(Utility.difference(new double[][]{truth[y]},new double[][]{observed[y]})));
-		double[][] mean = Utility.product(sum,1d/observed.length);
-		sum = new double[1][sum[0].length];
-		for(int y=0;y<observed.length;y++)
-		{
-			double[][] diff = Utility.difference(mean,Utility.abs(Utility.difference(new double[][]{truth[y]},new double[][]{observed[y]})));
-			double[][] sqrd = Utility.elementalProduct(diff,diff);
-			sum = Utility.sum(sum,sqrd);
-		}
-		double[][] variance = Utility.product(sum,1d/(observed.length-1));
-		double[][] R = Utility.diagonal(variance[0]);
-
-		
-		for(int y=0;y<observed.length;y++)
-			this.RMap.put((double)y, R);
+			this.RMap.put((double)y, Rk);
 
 		//Create Q
 		int spread = 5;
@@ -132,7 +121,11 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
 			}
 			double[][] sub = new double[spread][];
 			for(int s=0,o=xs;o<=xf;s++,o++)	sub[s] = truth[o];
-			QkMap.put((double)x,variance(sub));
+			double[] allVariance = variance(sub)[0];
+			double[][] Qk = new double[allVariance.length][allVariance.length];
+			for(int i=targetCount*2;i<targetCount*4;i++)
+				Qk[i][i] = allVariance[i];
+			QkMap.put((double)x,Qk);
 		}
 	}
 	
@@ -148,11 +141,7 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
 			double[][] sqrd = Utility.elementalProduct(diff,diff);
 			sum = Utility.sum(sum,sqrd);
 		}
-		double[] allVariance = Utility.product(sum,1d/(observed.length-1))[0];
-		double[][] variance = new double[allVariance.length][allVariance.length];
-		for(int i=targetCount*2;i<targetCount*4;i++)
-			variance[i][i] = allVariance[i];
-		return variance ;
+		return Utility.product(sum,1d/(observed.length-1));
 	}
 	private void insertVelocityAcceleration( TreeMap<Double, ArrayList<Double>> truth )
     {
