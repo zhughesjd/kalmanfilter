@@ -1,16 +1,11 @@
 package net.joshuahughes.kalmanfilter;
 
-import static net.joshuahughes.kalmanfilter.Utility.difference;
-import static net.joshuahughes.kalmanfilter.Utility.identity;
-import static net.joshuahughes.kalmanfilter.Utility.inverse;
-import static net.joshuahughes.kalmanfilter.Utility.product;
+import static net.joshuahughes.kalmanfilter.Utility.passThroughAssociator;
+import static net.joshuahughes.kalmanfilter.Utility.predictUpdate;
 import static net.joshuahughes.kalmanfilter.Utility.replace;
-import static net.joshuahughes.kalmanfilter.Utility.sum;
-import static net.joshuahughes.kalmanfilter.Utility.transpose;
 
 import net.joshuahughes.kalmanfilter.associator.Associator;
 import net.joshuahughes.kalmanfilter.associator.HungarianAssociator;
-import net.joshuahughes.kalmanfilter.associator.PassThroughAssociator;
 import net.joshuahughes.kalmanfilter.source.Source;
 import net.joshuahughes.kalmanfilter.source.Source.Data;
 import net.joshuahughes.kalmanfilter.source.VariousKinematicSource;
@@ -22,8 +17,8 @@ public class SimpleExample
 	public static void main(String[] args) throws Exception
 	{
 		int timeCount = 1000;//can be any positive integer
-		int targetCount = 25;//can be any positive integer
-		int observationCount = 4;// needs to be 2 or 4
+		int targetCount = 4;//can be any positive integer
+		int observationCount = 2;// needs to be 2 or 4
 		int stateCount = 6;//needs to be 4 or 6
 		int obsSwapCount = 0;//can be any non-negative number
 		double defaultQk = Double.NaN;//not used yet
@@ -32,7 +27,7 @@ public class SimpleExample
 		Source source = new VariousKinematicSource(timeCount,targetCount,observationCount,stateCount,obsSwapCount,defaultQk,defaultRk);
 		source.compute();
 		Target target = new JDialogTarget(timeCount, timeCount,observationCount,stateCount,targetCount);
-		Associator associator = obsSwapCount <= 0?new PassThroughAssociator():new HungarianAssociator(observationCount,stateCount);
+		Associator associator = obsSwapCount <= 0?passThroughAssociator:new HungarianAssociator(observationCount,stateCount);
 		
 		// Implementing https://en.wikipedia.org/wiki/Kalman_filter#Details
 		Data data0 = source.getData0();
@@ -51,26 +46,19 @@ public class SimpleExample
 			double[][] Fk = source.getFk(tk-tk1);
 			double[][] Qk1 = source.getQk1(tk1);
 			double[][] Hk = source.getHk(tk);
-			double[][] HkT = transpose(Hk);
 			double[][] Rk = source.getRk(tk);
 			
 			// Predict
-			double[][] xkk1 = product(Fk,xk1k1);
-			double[][] Pkk1 = sum(product(product(Fk,Pk1k1),transpose(Fk)),Qk1);			
+			double[][][] update = predictUpdate(xk1k1,Pk1k1,Fk,Qk1,zk,Hk,Rk,associator);
+			double[][] xkk1 = update[0];
+			double[][] Pkk1 = update[1];
+			double[][] xkk = update[2];
+			double[][] Pkk = update[3];
 
-			// Associate by Rearranging
-			zk = associator.associate(zk,xkk1,Pkk1);
-			
-			// Update
-			double[][] yk = difference(zk,product(Hk,xkk1));
-			double[][] Sk = sum(product(Hk,product(Pkk1,HkT)),Rk);
-			double[][] Kk = product(Pkk1,product(HkT,inverse(Sk)));
-			double[][] xkk = sum(xkk1,product(Kk,yk));
-			double[][] Pkk = product(difference(identity(Kk.length),product(Kk,Hk)),Pkk1);
 			xk1k1 = replace(xkk,xkk1);
 			Pk1k1 = replace(Pkk,Pkk1);
-			tk1 = tk;
 			target.receive(xk1k1,Pk1k1);
+			tk1 = tk;
 		}
 	}
 }

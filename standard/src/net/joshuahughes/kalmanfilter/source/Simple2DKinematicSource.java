@@ -1,6 +1,11 @@
 package net.joshuahughes.kalmanfilter.source;
 
+import static net.joshuahughes.kalmanfilter.Utility.abs;
+import static net.joshuahughes.kalmanfilter.Utility.diagonal;
+import static net.joshuahughes.kalmanfilter.Utility.difference;
+import static net.joshuahughes.kalmanfilter.Utility.identity;
 import static net.joshuahughes.kalmanfilter.Utility.transpose;
+import static net.joshuahughes.kalmanfilter.Utility.varianceDim2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,8 +13,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.stream.IntStream;
-
-import net.joshuahughes.kalmanfilter.Utility;
 
 public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> implements Source 
 {
@@ -113,34 +116,19 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
 			}
 			double[][] sub = new double[spread][];
 			for(int s=0,o=xs;o<=xf;s++,o++)	sub[s] = truth[o];
-			double[] allVariance = variance(sub)[0];
+			double[] allVariance = varianceDim2(sub)[0];
 			double[][] Qk = new double[allVariance.length][allVariance.length];
 			for(int i=targetCount*2;i<targetCount*4;i++)
 				Qk[i][i] = allVariance[i];
 			QkMap.put((double)x,Qk);
 		}
 		//Calculate R
-		double[][] magnitude = Utility.abs(Utility.difference(observed, truth));
+		double[][] magnitude = abs(difference(observed, truth));
 		for(int i=0;i<magnitude.length;i++)
 			magnitude[i] = Arrays.copyOfRange(magnitude[i],0,observationCount*targetCount);
-		double[][] Rk = Utility.diagonal(variance(magnitude)[0]);
+		double[][] Rk = diagonal(varianceDim2(magnitude)[0]);
 		for(int y=0;y<observed.length;y++)
 			this.RMap.put((double)y, Rk);
-	}
-	
-	private double[][] variance(double[][] observed) {
-		double[][] sum = new double[1][observed[0].length];
-		for(int y=0;y<observed.length;y++)
-			sum = Utility.sum(sum, new double[][]{observed[y]});
-		double[][] mean = Utility.product(sum,1d/observed.length);
-		sum = new double[1][observed[0].length];
-		for(int y=0;y<observed.length;y++)
-		{
-			double[][] diff = Utility.difference(mean,new double[][]{observed[y]});
-			double[][] sqrd = Utility.elementalProduct(diff,diff);
-			sum = Utility.sum(sum,sqrd);
-		}
-		return Utility.product(sum,1d/(observed.length-1));
 	}
 	private void insertVelocityAcceleration( TreeMap<Double, ArrayList<Double>> truth )
     {
@@ -190,7 +178,7 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
     }
     @Override
     public double[][] getPk0k0() {
-        return Utility.diagonal(targetCount*stateCount,1);
+        return diagonal(targetCount*stateCount,1);
     }
     @Override
     public double[][] getQk1(double time) {
@@ -203,7 +191,7 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
     @Override
     public double[][] getFk(double dt) {
         //Position model entries
-        double[][] Fk = Utility.identity( stateCount*targetCount );
+        double[][] Fk = identity( stateCount*targetCount );
         //Velocity model entries
         int c = 2*targetCount;
         for(int r=0;c<Fk[0].length;r++) Fk[r][c++] = dt;
