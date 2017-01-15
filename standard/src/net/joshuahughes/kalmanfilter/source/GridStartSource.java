@@ -28,12 +28,16 @@ public class GridStartSource extends Simple2DKinematicSource
             return t0+"\t"+x0+"\t"+y0+"\t"+xv+"\t"+yv;
         }
     }
-    ArrayList<Target> list = new ArrayList<>();
+    ArrayList<Target> list;
     Rectangle2D.Double extents; 
     public GridStartSource(int timeCount, int targetCount, int observationCount, int stateCount, int obsSwapCount,double defaultQk,double defaultRk)
     {
         super(timeCount, targetCount, observationCount, stateCount, obsSwapCount,defaultQk, defaultRk);
-        extents = new Rectangle2D.Double( 0, 0, timeCount, timeCount );
+    }
+    private void initialize()
+    {
+    	list = new ArrayList<>();
+    	extents = new Rectangle2D.Double( 0, 0, timeCount, timeCount );
         double sqrt = Math.sqrt( targetCount );
         int floor = ( int ) Math.floor( sqrt );
         int xCount = floor  + (sqrt-floor!=0?1:0);
@@ -51,10 +55,11 @@ public class GridStartSource extends Simple2DKinematicSource
                 list.add( new Target(0, x0, y0, xv, yv, 200 + rand.nextDouble( )*100) );
             }
         }
+
     }
-    
     public double[] compute(int timeIndex, int targetIndex)
     {
+    	if(list == null)initialize();
         Target tgt = list.get( targetIndex );
         double dt = (timeIndex-tgt.t0);
         double x = tgt.x0 + dt*tgt.xv;

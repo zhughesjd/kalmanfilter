@@ -14,7 +14,9 @@ import java.util.Random;
 import java.util.TreeMap;
 import java.util.stream.IntStream;
 
-public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> implements Source 
+import net.joshuahughes.kalmanfilter.model.Model;
+
+public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> implements Source,Model 
 {
     private static final long serialVersionUID = 8619045911606133484L;
     TreeMap<Double,double[][]> RMap = new TreeMap<>();
@@ -37,9 +39,6 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
         this.observationCount = observationCount;
         this.stateCount = stateCount;
         this.obsSwapCount = obsSwapCount;
-    }
-    public void compute()
-    {
         TreeMap<Double,ArrayList<Double>> truth = new TreeMap<>();
         for(int timeIndex=0;timeIndex<timeCount;timeIndex++)
             for(int targetIndex=0;targetIndex<targetCount;targetIndex++)

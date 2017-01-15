@@ -20,7 +20,7 @@ import net.joshuahughes.kalmanfilter.source.Source.Data;
 
 public class JDialogTarget extends JDialog implements Target{
     private static final long serialVersionUID = 8982418677492822173L;
-    public static enum Type{recent_obs,all_obs,truth,estimates; JCheckBox box = new JCheckBox( this.name( ),false); BufferedImage image;};
+    public static enum Type{recent_obs,all_obs,truth,estimates; JCheckBox box = new JCheckBox( this.name( ),true); BufferedImage image;};
     JLabel lbl;
     int observationCount;
     int stateCount;
