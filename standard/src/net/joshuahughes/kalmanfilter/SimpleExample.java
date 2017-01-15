@@ -7,11 +7,11 @@ import static net.joshuahughes.kalmanfilter.Utility.replace;
 import net.joshuahughes.kalmanfilter.associator.Associator;
 import net.joshuahughes.kalmanfilter.associator.HungarianAssociator;
 import net.joshuahughes.kalmanfilter.model.Model;
+import net.joshuahughes.kalmanfilter.receiver.JDialogReceiver;
+import net.joshuahughes.kalmanfilter.receiver.Receiver;
 import net.joshuahughes.kalmanfilter.source.Source;
 import net.joshuahughes.kalmanfilter.source.Source.Data;
 import net.joshuahughes.kalmanfilter.source.VariousKinematicSource;
-import net.joshuahughes.kalmanfilter.target.JDialogTarget;
-import net.joshuahughes.kalmanfilter.target.Target;
 
 public class SimpleExample
 {
@@ -27,7 +27,7 @@ public class SimpleExample
 		Source source = new VariousKinematicSource(timeCount,targetCount,observationCount,stateCount,obsSwapCount,defaultQk,defaultRk);
 		Model model = (Model) source;
 		
-		Target target = new JDialogTarget(timeCount, timeCount,observationCount,stateCount,targetCount);
+		Receiver receiver = new JDialogReceiver(timeCount, timeCount,observationCount,stateCount,targetCount);
 		Associator associator = obsSwapCount <= 0?passThroughAssociator:new HungarianAssociator(observationCount,stateCount);
 		
 		// Implementing https://en.wikipedia.org/wiki/Kalman_filter#Details
@@ -36,12 +36,12 @@ public class SimpleExample
 		double[][] xk1k1 = new double[stateCount*targetCount][1];
         for(int i=0;i<data0.observations.length;i++)xk1k1[i][0]=data0.observations[i][0];
         double[][] Pk1k1 = model.getPk0k0();
-		target.receive(data0);
+		receiver.receive(data0);
 		for(Data data : source)
 		{
 			double tk = data.time;
 			double[][] zk = data.observations;
-			target.receive(data);
+			receiver.receive(data);
 
 			// Get k matricies
 			double[][] Fk = model.getFk(tk-tk1);
@@ -58,7 +58,7 @@ public class SimpleExample
 
 			xk1k1 = replace(xkk,xkk1);
 			Pk1k1 = replace(Pkk,Pkk1);
-			target.receive(xk1k1,Pk1k1);
+			receiver.receive(xk1k1,Pk1k1);
 			tk1 = tk;
 		}
 	}

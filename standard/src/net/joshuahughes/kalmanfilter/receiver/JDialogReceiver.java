@@ -1,4 +1,4 @@
-package net.joshuahughes.kalmanfilter.target;
+package net.joshuahughes.kalmanfilter.receiver;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -18,7 +18,7 @@ import javax.swing.WindowConstants;
 
 import net.joshuahughes.kalmanfilter.source.Source.Data;
 
-public class JDialogTarget extends JDialog implements Target{
+public class JDialogReceiver extends JDialog implements Receiver{
     private static final long serialVersionUID = 8982418677492822173L;
     public static enum Type{recent_obs,all_obs,truth,estimates; JCheckBox box = new JCheckBox( this.name( ),true); BufferedImage image;};
     JLabel lbl;
@@ -27,7 +27,7 @@ public class JDialogTarget extends JDialog implements Target{
     boolean grayMeasurement = true;
     BufferedImage combinedImage;
     private int targetCount;
-    public JDialogTarget(int xSize,int ySize,int observationCount,int stateCount,int targetCount)
+    public JDialogReceiver(int xSize,int ySize,int observationCount,int stateCount,int targetCount)
     {
     	Type.recent_obs.box.setSelected(true);
         this.targetCount = targetCount;
