@@ -9,6 +9,7 @@ import net.joshuahughes.kalmanfilter.associator.HungarianAssociator;
 import net.joshuahughes.kalmanfilter.model.Model;
 import net.joshuahughes.kalmanfilter.receiver.JDialogReceiver;
 import net.joshuahughes.kalmanfilter.receiver.Receiver;
+import net.joshuahughes.kalmanfilter.source.GridStartSource;
 import net.joshuahughes.kalmanfilter.source.Source;
 import net.joshuahughes.kalmanfilter.source.Source.Data;
 import net.joshuahughes.kalmanfilter.source.VariousKinematicSource;
@@ -18,13 +19,17 @@ public class SimpleExample
 	public static void main(String[] args) throws Exception
 	{
 		int timeCount = 1000;//can be any positive integer
-		int targetCount = 25;//can be any positive integer
+		int targetCount = 4;//can be any positive integer
 		int observationCount = 4;// needs to be 2 or 4
 		int stateCount = 6;//needs to be 4 or 6
 		int obsSwapCount = 0;//can be any non-negative number
 		double defaultQk = Double.NaN;//not used yet
 		double defaultRk = 20;//now being used
-		Source source = new VariousKinematicSource(timeCount,targetCount,observationCount,stateCount,obsSwapCount,defaultQk,defaultRk);
+		boolean useGrid = false;
+
+		Source source = useGrid
+				? new GridStartSource(timeCount,targetCount,observationCount,stateCount,obsSwapCount,defaultQk,defaultRk)
+				: new VariousKinematicSource(timeCount,targetCount,observationCount,stateCount,obsSwapCount,defaultQk,defaultRk);
 		Model model = (Model) source;
 		
 		Receiver receiver = new JDialogReceiver(timeCount, timeCount,observationCount,stateCount,targetCount);
@@ -58,6 +63,8 @@ public class SimpleExample
 
 			xk1k1 = replace(xkk,xkk1);
 			Pk1k1 = replace(Pkk,Pkk1);
+			Utility.print(xk1k1, "x");
+			Utility.print(Pk1k1, "Pk");
 			receiver.receive(xk1k1,Pk1k1);
 			tk1 = tk;
 		}
