@@ -1,9 +1,12 @@
 package net.joshuahughes.kalmanfilter;
 
 import static net.joshuahughes.kalmanfilter.Utility.passThroughAssociator;
-import static net.joshuahughes.kalmanfilter.Utility.predictUpdate;
+import static net.joshuahughes.kalmanfilter.Utility.predictAssociateUpdate;
 import static net.joshuahughes.kalmanfilter.Utility.replace;
 
+import java.util.LinkedHashMap;
+
+import net.joshuahughes.kalmanfilter.Utility.KalmanKey;
 import net.joshuahughes.kalmanfilter.associator.Associator;
 import net.joshuahughes.kalmanfilter.associator.HungarianAssociator;
 import net.joshuahughes.kalmanfilter.model.Model;
@@ -19,13 +22,13 @@ public class SimpleExample
 	public static void main(String[] args) throws Exception
 	{
 		int timeCount = 1000;//can be any positive integer
-		int targetCount = 4;//can be any positive integer
-		int observationCount = 4;// needs to be 2 or 4
+		int targetCount = 9;//can be any positive integer
+		int observationCount = 2;// needs to be 2 or 4
 		int stateCount = 6;//needs to be 4 or 6
 		int obsSwapCount = 0;//can be any non-negative number
 		double defaultQk = Double.NaN;//not used yet
 		double defaultRk = 20;//now being used
-		boolean useGrid = false;
+		boolean useGrid = true;
 
 		Source source = useGrid
 				? new GridStartSource(timeCount,targetCount,observationCount,stateCount,obsSwapCount,defaultQk,defaultRk)
@@ -33,7 +36,7 @@ public class SimpleExample
 		Model model = (Model) source;
 		
 		Receiver receiver = new JDialogReceiver(timeCount, timeCount,observationCount,stateCount,targetCount);
-		Associator associator = obsSwapCount <= 0?passThroughAssociator:new HungarianAssociator(observationCount,stateCount);
+		Associator associator = obsSwapCount <= 0?passThroughAssociator:new HungarianAssociator(observationCount,targetCount);
 		
 		// Implementing https://en.wikipedia.org/wiki/Kalman_filter#Details
 		Data data0 = source.getData0();
@@ -48,23 +51,23 @@ public class SimpleExample
 			double[][] zk = data.observations;
 			receiver.receive(data);
 
-			// Get k matricies
+			// Get matricies at time k
 			double[][] Fk = model.getFk(tk-tk1);
 			double[][] Qk1 = model.getQk1(tk1);
 			double[][] Hk = model.getHk(tk);
 			double[][] Rk = model.getRk(tk);
 			
-			// Predict
-			double[][][] update = predictUpdate(xk1k1,Pk1k1,Fk,Qk1,zk,Hk,Rk,associator);
-			double[][] xkk1 = update[0];
-			double[][] Pkk1 = update[1];
-			double[][] xkk = update[2];
-			double[][] Pkk = update[3];
-
+			// Predict - Associate - Update
+			LinkedHashMap<KalmanKey, double[][]> map = predictAssociateUpdate(xk1k1,Pk1k1,Fk,Qk1,zk,Hk,Rk,associator);
+			double[][] xkk1 = map.get(KalmanKey.xkk1);
+			double[][] Pkk1 = map.get(KalmanKey.Pkk1);
+			double[][] xkk = map.get(KalmanKey.xkk);
+			double[][] Pkk = map.get(KalmanKey.Pkk);
+			
+			// In this configuration, Double.NaN represents no data update for this iteration
 			xk1k1 = replace(xkk,xkk1);
 			Pk1k1 = replace(Pkk,Pkk1);
-			Utility.print(xk1k1, "x");
-			Utility.print(Pk1k1, "Pk");
+
 			receiver.receive(xk1k1,Pk1k1);
 			tk1 = tk;
 		}

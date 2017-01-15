@@ -1,6 +1,7 @@
 package net.joshuahughes.kalmanfilter;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Random;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -10,6 +11,7 @@ import org.apache.commons.math3.linear.SingularMatrixException;
 import net.joshuahughes.kalmanfilter.associator.Associator;
 
 public class Utility {
+	public static enum KalmanKey{xkk1,Pkk1,xkk,Pkk,yk,Sk,Kk};
 	public static Random rand = new Random(9832927l);
 	public static double invalid = 10000000d;
 	public static Associator passThroughAssociator = new Associator(){
@@ -177,40 +179,38 @@ public class Utility {
 		return transpose(varianceDim2(transpose(matrix)));
 	}
 
-	public static double[][][] predictUpdate(double[][] xk1k1, double[][] Pk1k1, double[][] Fk,double[][] Qk1, double[][] zk, double[][] Hk, double[][] Rk,Associator... associators)
+	public static LinkedHashMap<KalmanKey,double[][]> predictAssociateUpdate(double[][] xk1k1, double[][] Pk1k1, double[][] Fk,double[][] Qk1, double[][] zk, double[][] Hk, double[][] Rk,Associator... associators)
 	{
+		// Setup
+		LinkedHashMap<KalmanKey,double[][]> map = new LinkedHashMap<>();
 		Associator associator = associators == null || associators.length<=0? Utility.passThroughAssociator :associators[0];
 
-		//Predict
-		double[][][] predict = predict(xk1k1,Pk1k1,Fk,Qk1);
-		double[][] xkk1 = predict[0];
-		double[][] Pkk1 = predict[1];
+		// Predict
+		map.putAll(predict(xk1k1,Pk1k1,Fk,Qk1));
 		
 		// Associate by Rearranging
-		zk = associator.associate(zk,xkk1,Pkk1);
-		// Associate by Rearranging
-		double[][][] update = update(xkk1,Pkk1,zk,Hk,Rk);
-		double[][] xkk = update[0];
-		double[][] Pkk = update[1];
-		double[][] yk = update[2];
-		double[][] Sk = update[3];
-		double[][] Kk = update[4];
+		zk = associator.associate(zk,map.get(KalmanKey.xkk1),map.get(KalmanKey.Pkk1));
 		
-		//return all results
-		return new double[][][]{xkk1,Pkk1,xkk,Pkk,yk,Sk,Kk};
+		// Update
+		map.putAll(update(map.get(KalmanKey.xkk1),map.get(KalmanKey.Pkk1),zk,Hk,Rk));
+		
+		// Return all results
+		return map;
 	}
-	public static double[][][] predict(double[][] xk1k1, double[][] Pk1k1, double[][] Fk,double[][] Qk1) {
-		double[][] xkk1 = product(Fk,xk1k1);
-		double[][] Pkk1 = sum(product(product(Fk,Pk1k1),transpose(Fk)),Qk1);
-		return new double[][][]{xkk1,Pkk1};
+	public static LinkedHashMap<KalmanKey,double[][]> predict(double[][] xk1k1, double[][] Pk1k1, double[][] Fk,double[][] Qk1) {
+		LinkedHashMap<KalmanKey,double[][]> map = new LinkedHashMap<>();
+		map.put(KalmanKey.xkk1,product(Fk,xk1k1));
+		map.put(KalmanKey.Pkk1,sum(product(product(Fk,Pk1k1),transpose(Fk)),Qk1));
+		return map;
 	}
-	public static double[][][] update(double[][] xkk1, double[][] Pkk1,double[][] zk,double[][] Hk,double[][] Rk) {
+	public static LinkedHashMap<KalmanKey,double[][]> update(double[][] xkk1, double[][] Pkk1,double[][] zk,double[][] Hk,double[][] Rk) {
+		LinkedHashMap<KalmanKey,double[][]> map = new LinkedHashMap<>();
 		double[][] HkT = transpose(Hk);
-		double[][] yk = difference(zk,product(Hk,xkk1));
-		double[][] Sk = sum(product(Hk,product(Pkk1,HkT)),Rk);
-		double[][] Kk = product(Pkk1,product(HkT,inverse(Sk)));
-		double[][] xkk = sum(xkk1,product(Kk,yk));
-		double[][] Pkk = product(difference(identity(Kk.length),product(Kk,Hk)),Pkk1);
-		return new double[][][]{xkk,Pkk,yk,Sk,Kk};
+		map.put(KalmanKey.yk,difference(zk,product(Hk,xkk1)));
+		map.put(KalmanKey.Sk,sum(product(Hk,product(Pkk1,HkT)),Rk));
+		map.put(KalmanKey.Kk,product(Pkk1,product(HkT,inverse(map.get(KalmanKey.Sk)))));
+		map.put(KalmanKey.xkk,sum(xkk1,product(map.get(KalmanKey.Kk),map.get(KalmanKey.yk))));
+		map.put(KalmanKey.Pkk,product(difference(identity(map.get(KalmanKey.Kk).length),product(map.get(KalmanKey.Kk),Hk)),Pkk1));
+		return map;
 	}
 }
