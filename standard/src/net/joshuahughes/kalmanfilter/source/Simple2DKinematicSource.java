@@ -81,7 +81,6 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
                 int t1 = rand.nextInt(targetCount);
                 for(int s=0,p0=t0,p1=t1;s<stateCount;s++,p0+=targetCount,p1+=targetCount)
                 {
-
                     double tmp = perturb[time][p0];
                     perturb[time][p0] = perturb[time][p1];
                     perturb[time][p1] = tmp;

@@ -8,38 +8,44 @@ public class HungarianAssociator implements Associator{
 
 	int observationCount;
 	int targetCount;
-	public HungarianAssociator( int observationCount, int targetCount )
+	int stateCount;
+	public HungarianAssociator( int observationCount, int targetCount, int stateCount )
 	{
 		this.observationCount = observationCount;
 		this.targetCount = targetCount;
+		this.stateCount = stateCount;
 	}
 	@Override
 	public double[][] associate(double[][] observations, double[][] stateEstimates, double[][] estimateCovariance) {
-		double[][] obs = reshape(Utility.transpose( observations )[0],targetCount);
-		double[][] ste = reshape(Utility.transpose( stateEstimates )[0],targetCount);
-		//    	System.exit(1);
-		double[][] costMatrix = new double[ste[0].length][obs[0].length];
-		for(int s = 0;s<costMatrix.length;s++)
-			for(int o=0;o<costMatrix[s].length;o++)
-				costMatrix[s][o] = Math.hypot(ste[0][s] - obs[0][o], ste[1][s] - obs[1][o]);
+        Utility.print( Utility.transpose(observations), "observations" );
+        Utility.print( Utility.transpose(stateEstimates), "stateEstimates" );
+		double[][] costMatrix = new double[targetCount][targetCount];
+        for(int s = 0;s<costMatrix.length;s++)
+            for(int o=0;o<costMatrix.length;o++)
+				costMatrix[o][s] = Math.hypot(stateEstimates[s][0] - observations[o][0],stateEstimates[s+targetCount][0]-observations[o+targetCount][0]);
+        Utility.print( costMatrix, "cm" );
 		HungarianAlgorithm algorithm = new HungarianAlgorithm(costMatrix);
 		int[] association = algorithm.execute();
 		double[][] newObs = new double[observations.length][observations[0].length];
-		for(double[] newArray : newObs)
-			Arrays.fill(newArray,Double.NaN);
-		for(int offset=0;offset<observations.length;offset+=targetCount)
-			for(int a = 0;a<association.length;a++)
-				if(association[a]>-1)
-				{
-					newObs[offset+a][0] = observations[offset+association[a]][0];
-				}
+		for(double[] newArray : newObs)Arrays.fill(newArray,Double.NaN);
+		for(int o = 0;o<newObs.length;o++)
+		{
+		    int ai = o%targetCount;
+		    if(association[ai]<0)continue;
+		    int offset = targetCount*(o/targetCount);
+		    newObs[o][0] = observations[offset+association[ai]][0];
+		}
+        Utility.print( Utility.transpose(newObs), "newObs" );
+        System.out.println("ass"+Arrays.toString( association ));
+        System.out.println("**************************************");
+        System.exit( 1 );
 		return newObs;
 	}
-	public double[][] reshape( double[] vector, int stateCount )
+	public double[][] reshape( double[] vector )
 	{
-		double[][] reshape = new double[vector.length/stateCount][];
+		double[][] reshape = new double[vector.length/targetCount][];
 		for(int index=0;index<reshape.length;index++)
-			reshape[index] = Arrays.copyOfRange( vector, index*stateCount,(index+1)*stateCount);
+			reshape[index] = Arrays.copyOfRange( vector, index*targetCount,(index+1)*targetCount);
 		return reshape;
 	}
 }
