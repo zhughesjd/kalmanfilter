@@ -200,6 +200,12 @@ public abstract class Simple2DKinematicSource extends ArrayList<Source.Data> imp
         return Fk;
     }
     @Override
+    public double[][] getxk0k0(){
+        double[][] xk0k0 = new double[stateCount*targetCount][1];
+        for(int i=0;i<data0.observations.length;i++)xk0k0[i][0]=data0.observations[i][0];
+        return xk0k0;
+    }
+    @Override
     public double[][] getHk(double time) {
         double[][] Hk = new double[observationCount*targetCount][stateCount*targetCount];
         IntStream.range(0,observationCount*targetCount).forEach(i->Hk[i][i] = 1);

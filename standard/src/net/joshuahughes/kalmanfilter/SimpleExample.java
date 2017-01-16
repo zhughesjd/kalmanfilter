@@ -22,7 +22,7 @@ public class SimpleExample
 	public static void main(String[] args) throws Exception
 	{
 		int timeCount = 1000;//can be any positive integer
-		int targetCount = 9;//can be any positive integer
+		int targetCount = 4;//can be any positive integer
 		int observationCount = 2;// needs to be 2 or 4
 		int stateCount = 6;//needs to be 4 or 6
 		int obsSwapCount = 0;//can be any non-negative number
@@ -40,9 +40,10 @@ public class SimpleExample
 		
 		// Implementing https://en.wikipedia.org/wiki/Kalman_filter#Details
 		Data data0 = source.getData0();
+
 		double tk1=data0.time;
-		double[][] xk1k1 = new double[stateCount*targetCount][1];
-        for(int i=0;i<data0.observations.length;i++)xk1k1[i][0]=data0.observations[i][0];
+		double[][] xk1k1 = model.getxk0k0( );
+        
         double[][] Pk1k1 = model.getPk0k0();
 		receiver.receive(data0);
 		for(Data data : source)
