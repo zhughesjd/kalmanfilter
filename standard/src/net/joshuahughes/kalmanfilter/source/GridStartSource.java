@@ -52,7 +52,7 @@ public class GridStartSource extends Simple2DKinematicSource
                 double y0 = (y+1)*timeCount/(yCount+1);
                 double xv = (.5-rand.nextDouble( ))*4;
                 double yv = (.5-rand.nextDouble( ))*4;
-                list.add( new Target(0, x0, y0, xv, yv, 200 + rand.nextDouble( )*100) );
+                list.add( new Target(x, x0, y0, xv, yv, 200 + rand.nextDouble( )*100) );
             }
         }
 

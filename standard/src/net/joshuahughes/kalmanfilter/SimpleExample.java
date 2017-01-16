@@ -25,7 +25,7 @@ public class SimpleExample
         int targetCount = 4;//can be any positive integer
         int observationCount = 2;// needs to be 2 or 4
         int stateCount = 6;//needs to be 4 or 6
-        int obsSwapCount = 4;//can be any non-negative number
+        int obsSwapCount = 0;//can be any non-negative number
         double defaultQk = Double.NaN;//not used yet
         double defaultRk = 20;//now being used
         boolean useGrid = true;
