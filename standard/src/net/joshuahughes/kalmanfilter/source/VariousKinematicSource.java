@@ -37,22 +37,6 @@ public class VariousKinematicSource extends Simple2DKinematicSource
 			else
 				return new double[]{stoppingPosit,stoppingPosit,0d,0d};
 		}
-		//Travel in a circular path
-		if(targetIndex==3)
-		{
-			//Here observations are given only if conditions are met
-			double x = Double.NaN;
-			double y = Double.NaN;
-			//Uncomment the next line in order to skip some observations
-			//if(index<.25d*timeCount || .5d*timeCount<index)
-			{
-				double angle = timeIndex*(2d*Math.PI/timeCount);
-				double hypot = 200d;
-				x = timeCount/2d + hypot*Math.sin(angle);
-				y = timeCount/2d + hypot*Math.cos(angle);
-			}
-			return new double[]{x,y,0d,0d};
-		}
 		int rest = targetCount - 4;
 		double x = (targetIndex-4+1d)*(timeCount/(rest+1d));
 		double y = targetIndex%2 == 1?arrayPos:timeCount - arrayPos;
