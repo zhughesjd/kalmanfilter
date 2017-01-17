@@ -2,13 +2,11 @@ package net.joshuahughes.kalmanfilter.associator;
 
 import java.util.Arrays;
 
-import net.joshuahughes.kalmanfilter.Utility;
-
 public class HungarianAssociator implements Associator{
-
 	int observationCount;
 	int targetCount;
 	int stateCount;
+	int index=0;
 	public HungarianAssociator( int observationCount, int targetCount, int stateCount )
 	{
 		this.observationCount = observationCount;
@@ -31,18 +29,6 @@ public class HungarianAssociator implements Associator{
 			if(association[ai]<0)continue;
 			int offset = targetCount*(o/targetCount);
 			newObs[o][0] = observations[offset+association[ai]][0];
-		}
-//		if(Math.abs(stateEstimates[1][0] - newObs[1][0])>100)
-		{
-			System.out.println(stateEstimates[1][0]+"\t"+newObs[1][0]);
-			System.out.println(stateEstimates[5][0]+"\t"+newObs[5][0]);
-			Utility.print( Utility.transpose(stateEstimates), "stateEstimates" );
-			Utility.print( Utility.transpose(observations), "observations" );
-			Utility.print( costMatrix, "cm" );
-			Utility.print( Utility.transpose(newObs), "newObs" );
-			System.out.println("ass"+Arrays.toString( association ));
-			System.out.println("**************************************");
-			System.exit(1);
 		}
 		return newObs;
 	}

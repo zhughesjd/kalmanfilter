@@ -22,10 +22,10 @@ public class SimpleExample
     public static void main(String[] args) throws Exception
     {
         int timeCount = 1000;//can be any positive integer
-        int targetCount = 4;//can be any positive integer
+        int targetCount = 8;//can be any positive integer
         int observationCount = 2;// needs to be 2 or 4
         int stateCount = 6;//needs to be 4 or 6
-        int obsSwapCount = 0;//can be any non-negative number
+        int obsSwapCount = 4;//can be any non-negative number
         double defaultQk = Double.NaN;//not used yet
         double defaultRk = 20;//now being used
         boolean useGrid = true;
@@ -35,7 +35,7 @@ public class SimpleExample
 
         Receiver receiver = new JDialogReceiver(timeCount, timeCount,observationCount,stateCount,targetCount);
         Associator associator = 
-//                obsSwapCount<=0?passThroughAssociator:
+                obsSwapCount<=0?passThroughAssociator:
                 new HungarianAssociator(observationCount,targetCount,stateCount);
 
         // Implementing https://en.wikipedia.org/wiki/Kalman_filter#Details

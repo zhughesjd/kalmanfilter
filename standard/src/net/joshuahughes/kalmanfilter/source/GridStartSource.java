@@ -82,7 +82,6 @@ public class GridStartSource extends Simple2DKinematicSource
             tgt.y0 = y;
             tgt.xv+=rand.nextGaussian( );
             tgt.yv+=rand.nextGaussian( );
-            
         }
         return new double[]{x,y,tgt.xv,tgt.yv,0d,0d};
     }
