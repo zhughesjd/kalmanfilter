@@ -175,30 +175,40 @@ public class Utility {
 
 	public static LinkedHashMap<KalmanKey,double[][]> predictAssociateUpdate(double[][] xk1k1, double[][] Pk1k1, double[][] Fk,double[][] Qk1, double[][] zk, double[][] Hk, double[][] Rk,Associator... associators)
 	{
+		return predictAssociateUpdate(xk1k1, Pk1k1, Fk, Qk1, zk, Hk, Rk, null, associators);
+	}
+	public static LinkedHashMap<KalmanKey,double[][]> predictAssociateUpdate(double[][] xk1k1, double[][] Pk1k1, double[][] Fk,double[][] Qk1, double[][] zk, double[][] Hk, double[][] Rk,LinkedHashMap<KalmanKey,double[][]> map,Associator... associators)
+	{
 		// Setup
-		LinkedHashMap<KalmanKey,double[][]> map = new LinkedHashMap<>();
+		if(map == null) map = new LinkedHashMap<>();
 		Associator associator = associators == null || associators.length<=0? Utility.passThroughAssociator :associators[0];
 
 		// Predict
-		map.putAll(predict(xk1k1,Pk1k1,Fk,Qk1));
-		
+		map.putAll(predict(xk1k1,Pk1k1,Fk,Qk1,map));
+
 		// Associate by Rearranging
 		zk = associator.associate(zk,map.get(KalmanKey.xkk1),map.get(KalmanKey.Pkk1));
-		
+
 		// Update
-		map.putAll(update(map.get(KalmanKey.xkk1),map.get(KalmanKey.Pkk1),zk,Hk,Rk));
-		
+		map.putAll(update(map.get(KalmanKey.xkk1),map.get(KalmanKey.Pkk1),zk,Hk,Rk,map));
+
 		// Return all results
 		return map;
 	}
 	public static LinkedHashMap<KalmanKey,double[][]> predict(double[][] xk1k1, double[][] Pk1k1, double[][] Fk,double[][] Qk1) {
-		LinkedHashMap<KalmanKey,double[][]> map = new LinkedHashMap<>();
+		return predict(xk1k1, Pk1k1, Fk, Qk1, null);
+	}
+	public static LinkedHashMap<KalmanKey,double[][]> predict(double[][] xk1k1, double[][] Pk1k1, double[][] Fk,double[][] Qk1,LinkedHashMap<KalmanKey,double[][]> map) {
+		if(map == null)map = new LinkedHashMap<>();
 		map.put(KalmanKey.xkk1,product(Fk,xk1k1));
 		map.put(KalmanKey.Pkk1,sum(product(product(Fk,Pk1k1),transpose(Fk)),Qk1));
 		return map;
 	}
 	public static LinkedHashMap<KalmanKey,double[][]> update(double[][] xkk1, double[][] Pkk1,double[][] zk,double[][] Hk,double[][] Rk) {
-		LinkedHashMap<KalmanKey,double[][]> map = new LinkedHashMap<>();
+		return update(xkk1, Pkk1, zk, Hk, Rk, null);
+	}
+	public static LinkedHashMap<KalmanKey,double[][]> update(double[][] xkk1, double[][] Pkk1,double[][] zk,double[][] Hk,double[][] Rk,LinkedHashMap<KalmanKey,double[][]> map) {
+		if(map == null)map = new LinkedHashMap<>();
 		double[][] HkT = transpose(Hk);
 		map.put(KalmanKey.yk,difference(zk,product(Hk,xkk1)));
 		map.put(KalmanKey.Sk,sum(product(Hk,product(Pkk1,HkT)),Rk));
